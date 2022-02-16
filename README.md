@@ -37,3 +37,7 @@ Provides a way for challenge owners to check if a given _Solution_ is correct an
 ### Comment administration
 
 Comments can be appended to _Challenges_ or _Solutions_. Comments have a creation date and an owner. They can be deleted or edited by the owner at any time.
+
+## Subsystem dependencies
+
+![Subsystem dependencies](Subsystems.png)
