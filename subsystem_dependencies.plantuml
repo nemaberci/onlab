@@ -1,0 +1,30 @@
+@startuml Subsystems
+title Subsystems
+
+folder "User" as user {
+    [Authentication] as authentication
+    [User management] as usermanagement
+    [Authorization] as authorization
+}
+
+folder "Comment" as comment {
+    [Comment administration] as commentadministration
+}
+
+folder "Challenge" as challenge {
+    [Challenge administration] as challengeadministration
+    [Solution submission] as solutionsubmission
+}
+
+folder "Evaluation" as eval {
+    [Solution evaluation] as solutionevaluation
+}
+
+challenge .up.> user : uses
+comment .up.> user : uses
+challenge .up.> eval : uses
+comment .up.> challenge : uses
+usermanagement .left.> authentication : uses
+authorization .left.> usermanagement : uses
+
+@enduml
