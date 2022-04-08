@@ -30,10 +30,10 @@ export const Challenge: FC = () => {
             // todo: production code
 
             client = new ApolloClient({
-                uri: 'http://challenge:8080/graphql',
+                uri: '/challenge/graphql',
                 cache: new InMemoryCache(),
                 headers: {
-                    'Authorization': `Token ${jwtService.getToken()}`
+                    'Authorization': `Token ${jwtService.getToken()}` 
                 }
             });
         }

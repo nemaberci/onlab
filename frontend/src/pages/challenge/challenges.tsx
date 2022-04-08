@@ -21,7 +21,15 @@ export const Challenges: FC = () => {
         });
 
     } else {
-        // todo: production code
+
+        client = new ApolloClient({
+            uri: '/challenge/graphql',
+            cache: new InMemoryCache(),
+            headers: {
+                'Authorization': `Token ${jwtService.getToken()}`
+            }
+        });
+        
     }
 
     const {data, isError, isLoading} = useQuery("getChallenges", async () => {

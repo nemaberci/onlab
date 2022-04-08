@@ -40,7 +40,7 @@ export const Layout: FC = ({children}) => {
             });
         } else {
             client = new ApolloClient({
-                uri: 'http://challenge:8080/graphql',
+                uri: '/user/graphql',
                 cache: new InMemoryCache()
             });
         }

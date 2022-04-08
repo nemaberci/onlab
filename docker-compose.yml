@@ -9,55 +9,82 @@ services:
     volumes:
       # So that Traefik can listen to the Docker events
       - /var/run/docker.sock:/var/run/docker.sock
-      - C:\Work\bme\6_felev\onlab_proj\traefik:/etc/traefik:rw
+      - ./traefik:/etc/traefik:rw
 
   challenge:
-    image: openjdk:17
+    build:
+      context: ./challenge
+      dockerfile: Dockerfile 
+    image: challenge:latest
     restart: always
-    volumes:
-      - C:\Work\bme\6_felev\onlab_proj\challenge:/etc/challenge:rw
-    command: sh -c "java -jar /etc/challenge/target/challenge-0.0.1-SNAPSHOT.jar --spring.profiles.active=docker"
     ports:
       - "8080"
       - "9090"
     labels:
       - traefik.enable=true
-      - traefik.http.routers.challenge.entrypoints=web
-      - traefik.http.routers.challenge.rule=PathPrefix(`/challenge`)
+      - traefik.http.routers.challenge_graphql.entrypoints=web
+      - traefik.http.routers.challenge_graphql.rule=PathPrefix(`/challenge/graphql`)
+      - traefik.http.routers.challenge_graphql.service=challenge_graphql
       - traefik.http.middlewares.challenge-strip-prefix.stripprefix.prefixes=/challenge
-      - traefik.http.routers.challenge.middlewares=challenge-strip-prefix@docker
+      - traefik.http.routers.challenge_graphql.middlewares=challenge-strip-prefix@docker
+      - traefik.http.services.challenge_graphql.loadbalancer.server.port=8080
+      - traefik.http.routers.challenge_grpc.entrypoints=web
+      - traefik.http.routers.challenge_grpc.rule=!PathPrefix(`/challenge/graphql`) && PathPrefix(`/challenge`)
+      - traefik.http.routers.challenge_grpc.service=challenge_grpc
+      - traefik.http.routers.challenge_grpc.middlewares=challenge-strip-prefix@docker
+      - traefik.http.services.challenge_grpc.loadbalancer.server.port=9090
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
 
   solution:
-    image: openjdk:17
     restart: always
-    volumes:
-      - C:\Work\bme\6_felev\onlab_proj\solution:/etc/solution:rw
-    command: sh -c "java -jar /etc/solution/target/solution-0.0.1-SNAPSHOT.jar --spring.profiles.active=docker"
+    build:
+      context: ./solution
+      dockerfile: Dockerfile 
+    image: solution:latest
     ports:
       - "8080"
       - "9090"
     labels:
       - traefik.enable=true
-      - traefik.http.routers.solution.entrypoints=web
-      - traefik.http.routers.solution.rule=PathPrefix(`/solution`)
+      - traefik.http.routers.solution_graphql.entrypoints=web
+      - traefik.http.routers.solution_graphql.rule=PathPrefix(`/solution/graphql`)
+      - traefik.http.routers.solution_graphql.service=solution_graphql
       - traefik.http.middlewares.solution-strip-prefix.stripprefix.prefixes=/solution
-      - traefik.http.routers.solution.middlewares=solution-strip-prefix@docker
+      - traefik.http.routers.solution_graphql.middlewares=solution-strip-prefix@docker
+      - traefik.http.services.solution_graphql.loadbalancer.server.port=8080
+      - traefik.http.routers.solution_grpc.entrypoints=web
+      - traefik.http.routers.solution_grpc.rule=!PathPrefix(`/solution/graphql`) && PathPrefix(`/solution`)
+      - traefik.http.routers.solution_grpc.service=solution_grpc
+      - traefik.http.routers.solution_grpc.middlewares=solution-strip-prefix@docker
+      - traefik.http.services.solution_grpc.loadbalancer.server.port=9090
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
 
   user:
-    image: openjdk:17
+    build:
+      context: ./user
+      dockerfile: Dockerfile 
+    image: user:latest
     restart: always
-    volumes:
-      - C:\Work\bme\6_felev\onlab_proj\user:/etc/user:rw
-    command: sh -c "java -jar /etc/user/target/user-0.0.1-SNAPSHOT.jar --spring.profiles.active=docker"
     ports:
       - "8080"
       - "9090"
     labels:
       - traefik.enable=true
-      - traefik.http.routers.user.entrypoints=web
-      - traefik.http.routers.user.rule=PathPrefix(`/user`)
+      - traefik.http.routers.user_graphql.entrypoints=web
+      - traefik.http.routers.user_graphql.rule=PathPrefix(`/user/graphql`)
+      - traefik.http.routers.user_graphql.service=user_graphql
       - traefik.http.middlewares.user-strip-prefix.stripprefix.prefixes=/user
-      - traefik.http.routers.user.middlewares=user-strip-prefix@docker
+      - traefik.http.routers.user_graphql.middlewares=user-strip-prefix@docker
+      - traefik.http.services.user_graphql.loadbalancer.server.port=8080
+      - traefik.http.routers.user_grpc.entrypoints=web
+      - traefik.http.routers.user_grpc.rule=!PathPrefix(`/user/graphql`) && PathPrefix(`/user`)
+      - traefik.http.routers.user_grpc.service=user_grpc
+      - traefik.http.routers.user_grpc.middlewares=user-strip-prefix@docker
+      - traefik.http.services.user_grpc.loadbalancer.server.port=9090
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
 
   frontend:
     build:
