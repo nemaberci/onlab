@@ -1,0 +1,16 @@
+option java_package = "hu.nemaberci.user.proto";
+
+message ModifyRole {
+    oneof identifier {
+        string emailAddress = 1;
+        int64 id = 2;
+    }
+    required string role = 3;
+}
+
+message NoParams {}
+
+service UserService {
+    rpc AddRole(ModifyRole) returns (NoParams) {}
+    rpc DeleteRole(ModifyRole) returns (NoParams) {}
+}

@@ -1,0 +1,103 @@
+version: '3'
+
+services:
+  reverse-proxy:
+    image: traefik:v2.6
+    ports:
+      - "80:80"
+      - "8080:8080"
+    volumes:
+      # So that Traefik can listen to the Docker events
+      - /var/run/docker.sock:/var/run/docker.sock
+      - C:\Work\bme\6_felev\onlab_proj\traefik:/etc/traefik:rw
+
+  challenge:
+    image: openjdk:17
+    restart: always
+    volumes:
+      - C:\Work\bme\6_felev\onlab_proj\challenge:/etc/challenge:rw
+    command: sh -c "java -jar /etc/challenge/target/challenge-0.0.1-SNAPSHOT.jar --spring.profiles.active=docker"
+    ports:
+      - "8080"
+      - "9090"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.challenge.entrypoints=web
+      - traefik.http.routers.challenge.rule=PathPrefix(`/challenge`)
+      - traefik.http.middlewares.challenge-strip-prefix.stripprefix.prefixes=/challenge
+      - traefik.http.routers.challenge.middlewares=challenge-strip-prefix@docker
+
+  solution:
+    image: openjdk:17
+    restart: always
+    volumes:
+      - C:\Work\bme\6_felev\onlab_proj\solution:/etc/solution:rw
+    command: sh -c "java -jar /etc/solution/target/solution-0.0.1-SNAPSHOT.jar --spring.profiles.active=docker"
+    ports:
+      - "8080"
+      - "9090"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.solution.entrypoints=web
+      - traefik.http.routers.solution.rule=PathPrefix(`/solution`)
+      - traefik.http.middlewares.solution-strip-prefix.stripprefix.prefixes=/solution
+      - traefik.http.routers.solution.middlewares=solution-strip-prefix@docker
+
+  user:
+    image: openjdk:17
+    restart: always
+    volumes:
+      - C:\Work\bme\6_felev\onlab_proj\user:/etc/user:rw
+    command: sh -c "java -jar /etc/user/target/user-0.0.1-SNAPSHOT.jar --spring.profiles.active=docker"
+    ports:
+      - "8080"
+      - "9090"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.user.entrypoints=web
+      - traefik.http.routers.user.rule=PathPrefix(`/user`)
+      - traefik.http.middlewares.user-strip-prefix.stripprefix.prefixes=/user
+      - traefik.http.routers.user.middlewares=user-strip-prefix@docker
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile 
+    image: result/latest
+    ports:
+      - "8080"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.frontend.entrypoints=web
+      - traefik.http.routers.frontend.rule=PathPrefix(`/frontend`)
+      - traefik.http.middlewares.frontend-strip-prefix.stripprefix.prefixes=/frontend
+      - traefik.http.routers.frontend.middlewares=frontend-strip-prefix@docker
+      - traefik.http.routers.frontend-assets.entrypoints=web
+      - traefik.http.routers.frontend-assets.rule=PathPrefix(`/static`)
+
+  postgresql_challenge:
+    image: postgres:alpine
+    environment:
+      POSTGRES_USER: postgres_admin
+      POSTGRES_PASSWORD: SECURE_PASSWORD
+      POSTGRES_DB: challenge
+    ports:
+      - "5432"
+
+  postgresql_solution:
+    image: postgres:alpine
+    environment:
+      POSTGRES_USER: postgres_admin
+      POSTGRES_PASSWORD: SECURE_PASSWORD
+      POSTGRES_DB: solution
+    ports:
+      - "5432"
+
+  postgresql_user:
+    image: postgres:alpine
+    environment:
+      POSTGRES_USER: postgres_admin
+      POSTGRES_PASSWORD: SECURE_PASSWORD
+      POSTGRES_DB: solution
+    ports:
+      - "5432"

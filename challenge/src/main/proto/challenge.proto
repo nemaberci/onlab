@@ -1,0 +1,23 @@
+option java_package = "hu.nemaberci.challenge.proto";
+
+message Id {
+    required int64 id = 1;
+}
+
+message Exists {
+    required bool exists = 1;
+}
+
+message Challenge {
+    required int64 id = 1;
+    required string name = 2;
+    required string description = 3;
+}
+
+message NoParams {}
+
+service ChallengeService {
+    rpc ChallengeExists(Id) returns (Exists) {}
+    rpc ChallengeData(Id) returns (Challenge) {}
+    rpc Challenges(NoParams) returns (stream Challenge) {}
+}

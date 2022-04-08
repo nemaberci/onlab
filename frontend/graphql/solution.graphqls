@@ -1,0 +1,40 @@
+type Solution {
+    id: ID!
+    result: Boolean
+    language: String
+    content: String
+    challengeId: ID!
+}
+
+input SolutionInput {
+    language: String!
+    content: String!
+    challengeId: ID!
+}
+
+type SolutionQuery {
+    all: [Solution]
+    byChallenge(id: ID!): [Solution]
+}
+
+type SolutionMutation {
+    create(solution: SolutionInput!): Solution
+    update(id: ID!, solution: SolutionInput!): Solution
+    delete(id: ID!): Boolean
+}
+
+extend type Query {
+    solution: SolutionQuery
+}
+
+extend type Mutation {
+    solution: SolutionMutation
+}
+
+type Query {
+
+}
+
+type Mutation {
+
+}

@@ -1,0 +1,29 @@
+{
+  "name": "All Microservices",
+  "schemaPath": "schema.graphql",
+  "extensions": {
+    "endpoints": {
+      "Solution": {
+        "url": "http://localhost:8080/graphql",
+        "headers": {
+          "user-agent": "JS GraphQL"
+        },
+        "introspect": false
+      },
+      "User": {
+        "url": "http://localhost:8082/graphql",
+        "headers": {
+          "user-agent": "JS GraphQL"
+        },
+        "introspect": false
+      },
+      "Challenge": {
+        "url": "http://localhost:8081/graphql",
+        "headers": {
+          "user-agent": "JS GraphQL"
+        },
+        "introspect": false
+      }
+    }
+  }
+}

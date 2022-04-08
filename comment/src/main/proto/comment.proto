@@ -1,0 +1,34 @@
+option java_package = "hu.nemaberci.comment.proto";
+
+message Id {
+    required int64 id = 1;
+}
+
+message Exists {
+    required bool exists = 1;
+}
+
+enum CommentOwner {
+    SOLUTION = 1;
+    CHALLENGE = 2;
+}
+
+message Owner {
+    required CommentOwner ownerType = 1;
+    required int64 ownerId = 2;
+}
+
+message Comment {
+    required int64 id = 1;
+    required string text = 2;
+    required Owner owner = 3;
+    required int64 userId = 4;
+}
+
+message NoParams {}
+
+service CommentService {
+    rpc byOwner(Owner) returns (stream Comment) {}
+    rpc byUserId(Id) returns (stream Comment) {}
+    rpc all(NoParams) returns (stream Comment) {}
+}

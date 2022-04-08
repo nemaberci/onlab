@@ -1,0 +1,34 @@
+type Challenge {
+    id: ID!,
+    name: String,
+    description: String
+}
+
+input ChallengeInput {
+    name: String,
+    description: String
+}
+
+type ChallengeQuery {
+    all: [Challenge]
+}
+
+type ChallengeMutation {
+    create(challenge: ChallengeInput!): Challenge
+    update(id: ID!, challenge: ChallengeInput!): Challenge
+    delete(id: ID!): Boolean
+}
+
+extend type Query {
+    challenge: ChallengeQuery
+}
+
+extend type Mutation {
+    challenge: ChallengeMutation
+}
+
+type Query {
+}
+
+type Mutation {
+}
