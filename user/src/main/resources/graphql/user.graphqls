@@ -1,9 +1,20 @@
+type Role {
+    id: ID
+    name: String
+}
+
 type UserQuery {
     getJwt(token: String!): String
+    roles(id: ID, emailAddress: String): [Role]
+}
+
+type RoleQuery {
+    all: [Role]
 }
 
 type Query {
     user: UserQuery
+    role: RoleQuery
 }
 
 type UserMutation {

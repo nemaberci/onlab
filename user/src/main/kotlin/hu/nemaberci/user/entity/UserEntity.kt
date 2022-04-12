@@ -12,7 +12,10 @@ class UserEntity(email: String) {
     @Column(unique = true)
     var emailAddress: String = email;
 
-    @ElementCollection(fetch = FetchType.EAGER)
-    var roles: MutableList<String> = mutableListOf();
+    @ManyToMany
+    var roles: MutableList<RoleEntity> = mutableListOf();
+
+    @Column
+    var admin: Boolean = false;
 
 }

@@ -10,8 +10,15 @@ class BaseQuery: GraphQLQueryResolver {
     @Autowired
     private lateinit var userQuery: UserQuery
 
+    @Autowired
+    private lateinit var roleQuery: RoleQuery
+
     fun user(): UserQuery {
         return userQuery;
+    }
+
+    fun role(): RoleQuery {
+        return roleQuery
     }
 
 }

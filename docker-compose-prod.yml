@@ -17,12 +17,10 @@ services:
       - TRAEFIK_API_INSECURE=true
       - TRAEFIK_API_DASHBOARD=true
       - TRAEFIK_PROVIDERS_DOCKER=true
+    restart: always
 
   challenge:
-    build:
-      context: ./challenge
-      dockerfile: Dockerfile 
-    image: challenge:latest
+    image: onlabcontainerregistry.azurecr.io/challenge:latest
     restart: always
     ports:
       - "8080"
@@ -43,36 +41,8 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
 
-  solution:
-    restart: always
-    build:
-      context: ./solution
-      dockerfile: Dockerfile 
-    image: solution:latest
-    ports:
-      - "8080"
-      - "9090"
-    labels:
-      - traefik.enable=true
-      - traefik.http.routers.solution_graphql.entrypoints=web
-      - traefik.http.routers.solution_graphql.rule=PathPrefix(`/solution/graphql`)
-      - traefik.http.routers.solution_graphql.service=solution_graphql
-      - traefik.http.middlewares.solution-strip-prefix.stripprefix.prefixes=/solution
-      - traefik.http.routers.solution_graphql.middlewares=solution-strip-prefix@docker
-      - traefik.http.services.solution_graphql.loadbalancer.server.port=8080
-      - traefik.http.routers.solution_grpc.entrypoints=web
-      - traefik.http.routers.solution_grpc.rule=!PathPrefix(`/solution/graphql`) && PathPrefix(`/solution`)
-      - traefik.http.routers.solution_grpc.service=solution_grpc
-      - traefik.http.routers.solution_grpc.middlewares=solution-strip-prefix@docker
-      - traefik.http.services.solution_grpc.loadbalancer.server.port=9090
-    environment:
-      - SPRING_PROFILES_ACTIVE=docker
-
   user:
-    build:
-      context: ./user
-      dockerfile: Dockerfile 
-    image: user:latest
+    image: onlabcontainerregistry.azurecr.io/user:latest
     restart: always
     ports:
       - "8080"
@@ -94,10 +64,7 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
 
   frontend:
-    build:
-      context: ./frontend
-      dockerfile: Dockerfile 
-    image: frontend:latest
+    image: onlabcontainerregistry.azurecr.io/frontend:latest
     ports:
       - "3000"
     labels:
@@ -112,6 +79,7 @@ services:
       - traefik.http.routers.frontend-manifest.rule=Path(`/manifest.json`)
       - traefik.http.routers.frontend-anything-else.entrypoints=web
       - traefik.http.routers.frontend-anything-else.rule=Path(`/{name:[a-z0-9A-Z]+}.png`, `/{name:[a-z0-9A-Z]+}.jpg`, `/{name:[a-z0-9A-Z]+}.js`, `/{name:[a-z0-9A-Z]+}.css`)
+    restart: always
 
   postgresql_challenge:
     image: postgres:alpine
@@ -121,15 +89,7 @@ services:
       POSTGRES_DB: challenge
     ports:
       - "5432"
-
-  postgresql_solution:
-    image: postgres:alpine
-    environment:
-      POSTGRES_USER: postgres_admin
-      POSTGRES_PASSWORD: SECURE_PASSWORD
-      POSTGRES_DB: solution
-    ports:
-      - "5432"
+    restart: always
 
   postgresql_user:
     image: postgres:alpine
@@ -139,3 +99,4 @@ services:
       POSTGRES_DB: user
     ports:
       - "5432"
+    restart: always

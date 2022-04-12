@@ -55,4 +55,8 @@ class ChallengeService {
                     challengeRepository.getById(id)
             )
 
+    companion object {
+        val CHALLENGE_ROLE = "challenge"
+    }
+
 }

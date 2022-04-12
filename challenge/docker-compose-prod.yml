@@ -1,0 +1,24 @@
+version: '3'
+
+services:
+
+  challenge:
+    build:
+      context: ./challenge
+      dockerfile: Dockerfile 
+    image: onlabcontainerregistry.azurecr.io/challenge:latest
+    restart: always
+    ports:
+      - "8080"
+      - "9090"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+
+  postgresql_challenge:
+    image: postgres:alpine
+    environment:
+      POSTGRES_USER: postgres_admin
+      POSTGRES_PASSWORD: SECURE_PASSWORD
+      POSTGRES_DB: challenge
+    ports:
+      - "5432"

@@ -3,12 +3,19 @@ package hu.nemaberci.challenge.grpc
 import hu.nemaberci.challenge.proto.ChallengeOuterClass
 import hu.nemaberci.challenge.proto.ChallengeServiceGrpc
 import hu.nemaberci.challenge.service.ChallengeService
+import hu.nemaberci.user.proto.User
+import hu.nemaberci.user.proto.UserServiceGrpc
 import io.grpc.stub.StreamObserver
+import net.devh.boot.grpc.client.inject.GrpcClient
 import net.devh.boot.grpc.server.service.GrpcService
 import org.springframework.beans.factory.annotation.Autowired
+import javax.annotation.PostConstruct
 
 @GrpcService
 class ChallengeGrpcService: ChallengeServiceGrpc.ChallengeServiceImplBase() {
+
+    @GrpcClient("userService")
+    private lateinit var userServiceBlockingStub: UserServiceGrpc.UserServiceBlockingStub
 
     @Autowired
     lateinit var challengeService: ChallengeService
@@ -48,6 +55,15 @@ class ChallengeGrpcService: ChallengeServiceGrpc.ChallengeServiceImplBase() {
             )
         }
         responseObserver.onCompleted()
+    }
+
+    @PostConstruct
+    fun createRoles() {
+        userServiceBlockingStub.registedRole(
+                User.RegisterRole.newBuilder()
+                        .setRole(ChallengeService.CHALLENGE_ROLE)
+                        .build()
+        )
     }
 
 }

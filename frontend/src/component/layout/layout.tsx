@@ -21,9 +21,24 @@ export const Layout: FC = ({children}) => {
 
     let navigate = useNavigate()
 
+    // from: https://stackoverflow.com/questions/38552003/how-to-decode-jwt-token-in-javascript-without-using-a-library
+    function parseJwt (token: string) {
+        var base64Url = token.split('.')[1];
+        var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        var jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+    
+        return JSON.parse(jsonPayload);
+    };
+
     function logout() {
         jwtService.setToken(undefined)
         navigate("/frontend")
+    }
+
+    function nav_roles() {
+        navigate("/frontend/roles")
     }
 
     async function onLoggedIn(response: GoogleLoginResponse | GoogleLoginResponseOffline) {
@@ -63,7 +78,10 @@ export const Layout: FC = ({children}) => {
                 console.log("Error: ", result.error, result.errors)
             } else {
                 jwtService.setToken(result.data.user.getJwt)
-                console.log("userService token:", jwtService.getToken())
+                if (typeof jwtService.getToken() !== "undefined") {
+                    let payload = parseJwt(jwtService.getToken() as string)
+                    console.log("userService token payload:", payload, (payload.roles as Array<string>))
+                }
                 navigate("/frontend")
             }
         } catch (e) {
@@ -123,6 +141,16 @@ export const Layout: FC = ({children}) => {
                                         </Text>
                                     </Button>
                                 }/>
+                        }
+                        {
+                            // has admin role
+                            parseJwt(jwtService.getToken() as string).roles.indexOf("admin") > -1
+                            && 
+                            <Button variant={"ghost"} onClick={nav_roles}>
+                                <Text display="block">
+                                    Roles
+                                </Text>
+                            </Button>
                         }
                         <ColorModeSwitcher justifySelf="flex-end"/>
                     </Stack>
