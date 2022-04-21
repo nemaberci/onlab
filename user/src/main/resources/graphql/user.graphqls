@@ -3,9 +3,16 @@ type Role {
     name: String
 }
 
+type User {
+    id: ID
+    emailAddress: String
+    roles: [Role]
+}
+
 type UserQuery {
     getJwt(token: String!): String
     roles(id: ID, emailAddress: String): [Role]
+    all: [User]
 }
 
 type RoleQuery {

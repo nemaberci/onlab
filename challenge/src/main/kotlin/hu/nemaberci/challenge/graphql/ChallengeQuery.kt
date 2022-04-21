@@ -16,4 +16,6 @@ class ChallengeQuery: GraphQLResolver<ChallengeQuery> {
         return challengeService.getAllChallenges()
     }
 
+    fun byId(id: Long): Challenge = challengeService.byId(id)
+
 }

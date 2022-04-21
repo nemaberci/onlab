@@ -1,18 +1,73 @@
 import {FC} from "react";
 import {Layout} from "../../component/layout/layout";
-import {Button, Flex, FormControl, FormErrorMessage, FormLabel, Input} from "@chakra-ui/react";
+import {Button, Flex, FormControl, FormErrorMessage, FormLabel, Input, Textarea} from "@chakra-ui/react";
 import {Form, Formik, Field} from "formik";
 import {ApolloClient, gql, InMemoryCache} from "@apollo/client";
 import {jwtService} from "../../service/login";
-import { useNavigate } from 'react-router-dom'
+import {useQuery} from "react-query"
+import { useNavigate, useParams } from 'react-router-dom'
 
 
 
 export const Challenge: FC = () => {
 
     let navigate = useNavigate()
+    let params = useParams()
 
-    async function onFormSubmit(data: any) {
+    let client: ApolloClient<any>;
+
+    if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+
+        client = new ApolloClient({
+            uri: 'http://localhost:8081/graphql',
+            cache: new InMemoryCache(),
+            headers: {
+                'Authorization': `Token ${jwtService.getToken()}`
+            }
+        });
+
+    } else {
+
+        client = new ApolloClient({
+            uri: '/challenge/graphql',
+            cache: new InMemoryCache(),
+            headers: {
+                'Authorization': `Token ${jwtService.getToken()}`
+            }
+        });
+        
+    }
+
+    const {data, isError, isLoading, isSuccess} = useQuery("getChallenges", async () => {
+
+        if (jwtService.getToken() === null || !params || !params.id) { return; }
+
+        let result = await client.query({
+            query: gql`
+                query GetChallenge ($id: ID!) {
+                    challenge {
+                        byId(id: $id) {
+                            description
+                            name
+                        }
+                    }
+                }
+            `,
+            variables: {
+                id: params.id
+            }
+        });
+
+        if (result.error || result.errors) {
+            console.log("Error: ", result.error, result.errors)
+        } else {
+            console.log("Returning: ", result.data.challenge.byId)
+            return result.data.challenge.byId;
+        }
+
+    })
+
+    async function onCreate(formData: any) {
 
         let client: ApolloClient<any>;
 
@@ -27,7 +82,6 @@ export const Challenge: FC = () => {
             });
 
         } else {
-            // todo: production code
 
             client = new ApolloClient({
                 uri: '/challenge/graphql',
@@ -43,8 +97,6 @@ export const Challenge: FC = () => {
             return;
         }
 
-        console.log(data)
-
         let result = await client.mutate({
             mutation: gql`
                 mutation CreateChallenge($name: String!, $description: String!) {
@@ -56,8 +108,8 @@ export const Challenge: FC = () => {
                 }
             `,
             variables: {
-                name: data.name,
-                description: data.description
+                name: formData.name,
+                description: formData.description
             }
         });
 
@@ -69,10 +121,93 @@ export const Challenge: FC = () => {
 
     }
 
+    async function onSave(formData: any) {
+
+        let client: ApolloClient<any>;
+
+        if (!process.env.NODE_ENV || process.env.NODE_ENV === 'development') {
+
+            client = new ApolloClient({
+                uri: 'http://localhost:8081/graphql',
+                cache: new InMemoryCache(),
+                headers: {
+                    'Authorization': `Token ${jwtService.getToken()}`
+                }
+            });
+
+        } else {
+
+            client = new ApolloClient({
+                uri: '/challenge/graphql',
+                cache: new InMemoryCache(),
+                headers: {
+                    'Authorization': `Token ${jwtService.getToken()}` 
+                }
+            });
+        }
+
+
+        if (jwtService.getToken() === null) {
+            return;
+        }
+
+        let result = await client.mutate({
+            mutation: gql`
+                mutation UpdateChallenge($id: ID!, $name: String!, $description: String!) {
+                    challenge {
+                        update(id: $id, challenge: {name: $name, description: $description}) {
+                            id
+                        }
+                    }
+                }
+            `,
+            variables: {
+                id: params.id,
+                name: formData.name,
+                description: formData.description
+            }
+        });
+
+        if (result.errors) {
+            console.log("Error: ", result.errors)
+        } else {
+            navigate('../challenges')
+        }
+
+    }
+
+    if (isLoading) {
+        return (
+            <Layout>
+                <Flex
+                    justifyContent={"center"}
+                >
+
+                    <h2>Loading...</h2>
+
+                </Flex>
+            </Layout>
+        )
+    }
+
+    if (isError) {
+        return (
+            <Layout>
+                <Flex
+                    justifyContent={"center"}
+                >
+
+                    <h2>Error fetching data. Please reload the page.</h2>
+
+                </Flex>
+            </Layout>
+        )
+    }
+
     return (
         <Layout>
             <Flex p={"8"}>
-                <Formik onSubmit={onFormSubmit} initialValues={{name: '', description: ''}}>
+                <Formik onSubmit={data ? onSave : onCreate} initialValues={{name: data ? data.name : "", description: data ? data.description : ""}} enableReinitialize>
                     <Form>
                         <Field name={"name"}>
                             {({ field, form }: any) => (
@@ -87,12 +222,16 @@ export const Challenge: FC = () => {
                             {({ field, form }: any) => (
                                 <FormControl isInvalid={form.errors.name && form.touched.name}>
                                     <FormLabel htmlFor='description'>Description</FormLabel>
-                                    <Input {...field} id='description' placeholder='Description' />
+                                    <Textarea {...field} id='description' placeholder='Description' />
                                     <FormErrorMessage>{form.errors.name}</FormErrorMessage>
                                 </FormControl>
                             )}
                         </Field>
-                        <Button type={"submit"} mt={"4"}>Create!</Button>
+                        {
+                            data ? 
+                            <Button type={"submit"} mt={"4"}>Save!</Button> :
+                            <Button type={"submit"} mt={"4"}>Create!</Button>
+                        }
                     </Form>
                 </Formik>
             </Flex>

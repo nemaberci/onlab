@@ -59,11 +59,13 @@ class ChallengeGrpcService: ChallengeServiceGrpc.ChallengeServiceImplBase() {
 
     @PostConstruct
     fun createRoles() {
+
         userServiceBlockingStub.registedRole(
                 User.RegisterRole.newBuilder()
                         .setRole(ChallengeService.CHALLENGE_ROLE)
                         .build()
         )
+
     }
 
 }

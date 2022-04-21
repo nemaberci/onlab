@@ -4,8 +4,10 @@ import graphql.kickstart.tools.GraphQLResolver
 import hu.nemaberci.user.service.UserService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Component
+import javax.transaction.Transactional
 
 @Component
+@Transactional
 class UserMutation: GraphQLResolver<UserMutation> {
 
     @Autowired

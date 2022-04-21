@@ -14,6 +14,10 @@ services:
       - TRAEFIK_ENTRYPOINTS_web_ADDRESS=:80
       - TRAEFIK_ENTRYPOINTS_websecure=true
       - TRAEFIK_ENTRYPOINTS_websecure_ADDRESS=:443
+      - TRAEFIK_ENTRYPOINTS_user=true
+      - TRAEFIK_ENTRYPOINTS_user_ADDRESS=:9090
+      - TRAEFIK_ENTRYPOINTS_challenge=true
+      - TRAEFIK_ENTRYPOINTS_challenge_ADDRESS=:9091
       - TRAEFIK_API_INSECURE=true
       - TRAEFIK_API_DASHBOARD=true
       - TRAEFIK_PROVIDERS_DOCKER=true
@@ -33,13 +37,16 @@ services:
       - traefik.http.middlewares.challenge-strip-prefix.stripprefix.prefixes=/challenge
       - traefik.http.routers.challenge_graphql.middlewares=challenge-strip-prefix@docker
       - traefik.http.services.challenge_graphql.loadbalancer.server.port=8080
-      - traefik.http.routers.challenge_grpc.entrypoints=web
-      - traefik.http.routers.challenge_grpc.rule=!PathPrefix(`/challenge/graphql`) && PathPrefix(`/challenge`)
+      - traefik.http.routers.challenge_grpc.entrypoints=challenge
       - traefik.http.routers.challenge_grpc.service=challenge_grpc
-      - traefik.http.routers.challenge_grpc.middlewares=challenge-strip-prefix@docker
+      - traefik.http.routers.challenge_grpc.rule=ClientIP(`0.0.0.0/0`)
       - traefik.http.services.challenge_grpc.loadbalancer.server.port=9090
+      - traefik.http.services.challenge_grpc.loadbalancer.server.scheme=h2c
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+      - GRPC_CLIENT_USERSERVICE_ADDRESS=dns:///reverse-proxy:9090
+    depends_on:
+      - user
 
   user:
     image: onlabcontainerregistry.azurecr.io/user:latest
@@ -55,11 +62,11 @@ services:
       - traefik.http.middlewares.user-strip-prefix.stripprefix.prefixes=/user
       - traefik.http.routers.user_graphql.middlewares=user-strip-prefix@docker
       - traefik.http.services.user_graphql.loadbalancer.server.port=8080
-      - traefik.http.routers.user_grpc.entrypoints=web
-      - traefik.http.routers.user_grpc.rule=!PathPrefix(`/user/graphql`) && PathPrefix(`/user`)
+      - traefik.http.routers.user_grpc.entrypoints=user
       - traefik.http.routers.user_grpc.service=user_grpc
-      - traefik.http.routers.user_grpc.middlewares=user-strip-prefix@docker
+      - traefik.http.routers.user_grpc.rule=ClientIP(`0.0.0.0/0`)
       - traefik.http.services.user_grpc.loadbalancer.server.port=9090
+      - traefik.http.services.user_grpc.loadbalancer.server.scheme=h2c
     environment:
       - SPRING_PROFILES_ACTIVE=docker
 

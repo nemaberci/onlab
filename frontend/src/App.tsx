@@ -12,6 +12,7 @@ export const App = () => (
                 <Route index element={<Index />}/>
                 <Route path={"challenges"} element={<Challenges />}/>
                 <Route path={"challenge/new"} element={<Challenge />}/>
+                <Route path={"challenge/update/:id"} element={<Challenge />}/>
                 <Route path={"roles"} element={<Roles />}/>
             </Route>
         </Routes>

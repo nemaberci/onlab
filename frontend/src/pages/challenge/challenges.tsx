@@ -32,7 +32,7 @@ export const Challenges: FC = () => {
         
     }
 
-    const {data, isError, isLoading} = useQuery("getChallenges", async () => {
+    const {data, isError, isLoading, refetch} = useQuery("getChallenges", async () => {
 
         if (jwtService.getToken() === null) { return; }
 
@@ -44,6 +44,7 @@ export const Challenges: FC = () => {
                             description
                             id
                             name
+                            createdBy
                         }
                     }
                 }
@@ -86,6 +87,27 @@ export const Challenges: FC = () => {
         )
     }
 
+    async function deleteChallenge(id: String | Number) {
+
+        if (jwtService.getToken() === null) { return; }
+
+        await client.mutate({
+            mutation: gql`
+                mutation DeleteChallenge($id: ID!) {
+                    challenge {
+                        delete (id: $id)
+                    }
+                }
+            `,
+            variables: {
+                id: id
+            }
+        });
+
+        await refetch();
+
+    }
+
     if (jwtService.getToken() === null) {
 
         return (
@@ -101,6 +123,22 @@ export const Challenges: FC = () => {
         )
 
     } else {
+
+        if (!data) {
+
+            return (
+                <Layout>
+                    <Flex
+                        justifyContent={"center"}
+                    >
+    
+                        <h2>You do not have rights to view challenges!</h2>
+    
+                    </Flex>
+                </Layout>
+            )
+
+        }
 
         return (
             <Layout>
@@ -120,14 +158,27 @@ export const Challenges: FC = () => {
                             <Th>Id</Th>
                             <Th>Name</Th>
                             <Th>Description</Th>
+                            <Th>Created by</Th>
+                            <Th>Actions</Th>
                         </Thead>
                         <Tbody>
-                            {data.map((challenge: {id: Number, name: String, description: String}) => {
+                            {data.map && data.map((challenge: {id: Number, name: String, description: String, createdBy: String}) => {
                                 return (
                                     <Tr>
                                         <Td>{challenge.id}</Td>
                                         <Td>{challenge.name}</Td>
                                         <Td>{challenge.description}</Td>
+                                        <Td>{challenge.createdBy}</Td>
+                                        <Td>
+                                            <Button variant={"ghost"} colorScheme={"red"} onClick={() => {deleteChallenge(challenge.id)}}>
+                                                Delete
+                                            </Button>
+                                            <Button variant={"ghost"} colorScheme={"blue"}>
+                                                <Link to={`/frontend/challenge/update/${challenge.id}`}>
+                                                    Update
+                                                </Link>
+                                            </Button>
+                                        </Td>
                                     </Tr>
                                 )
                             })}

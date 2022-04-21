@@ -2,6 +2,7 @@ type Challenge {
     id: ID!,
     name: String,
     description: String
+    createdBy: String
 }
 
 input ChallengeInput {
@@ -11,6 +12,7 @@ input ChallengeInput {
 
 type ChallengeQuery {
     all: [Challenge]
+    byId(id: ID!): Challenge
 }
 
 type ChallengeMutation {

@@ -1,0 +1,4 @@
+docker login onlabcontainerregistry.azurecr.io
+docker build -t <proj_name>:latest .
+docker tag <proj_name>:latest onlabcontainerregistry.azurecr.io/<proj_name>
+docker push onlabcontainerregistry.azurecr.io/<proj_name>

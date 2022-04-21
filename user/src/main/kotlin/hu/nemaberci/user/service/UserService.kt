@@ -6,6 +6,7 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
 import hu.nemaberci.user.dto.Role
+import hu.nemaberci.user.dto.User
 import hu.nemaberci.user.entity.RoleEntity
 import hu.nemaberci.user.entity.UserEntity
 import hu.nemaberci.user.repository.RoleRepository
@@ -25,25 +26,11 @@ class UserService {
     @Value("\${hu.nemaberci.jwt.secret}")
     private lateinit var jwtSecret: String
 
-    @Value("\${hu.nemaberci.admin_email}")
-    private lateinit var adminEmail: String
-
     @Autowired
     private lateinit var userRepository: UserRepository
 
     @Autowired
     private lateinit var roleRepository: RoleRepository
-
-    @PostConstruct
-    fun init() {
-        val userEntity = userRepository.findFirstByEmailAddress(adminEmail).orElse(
-                userRepository.save(
-                        UserEntity(adminEmail)
-                )
-        )
-        userEntity.admin = true
-        userRepository.save(userEntity)
-    }
 
     fun createJwt(
             token: String
@@ -75,9 +62,7 @@ class UserService {
                     .withExpiresAt(Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
                     .withPayload(
                             mapOf(
-                                    "roles" to if (user.admin)
-                                            user.roles.map { role -> role.name }.plus("admin") else
-                                            user.roles.map { role -> role.name },
+                                    "roles" to user.roles.map { role -> role.name },
                                     "emailAddress" to user.emailAddress
                             )
                     )
@@ -187,6 +172,12 @@ class UserService {
 
         // Execution will never get here
         return listOf()
+
+    }
+
+    fun getAllUsers(): List<User> {
+
+        return userRepository.findAll().map(User::from)
 
     }
 

@@ -4,6 +4,7 @@ import hu.nemaberci.challenge.dto.Challenge
 import hu.nemaberci.challenge.entity.ChallengeEntity
 import hu.nemaberci.challenge.repository.ChallengeRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 
 @Service
@@ -11,6 +12,10 @@ class ChallengeService {
 
     @Autowired
     private lateinit var challengeRepository: ChallengeRepository
+
+    private fun hasAccess(entity: ChallengeEntity): Boolean = entity.createdBy == SecurityContextHolder.getContext().authentication.credentials as String ||
+                SecurityContextHolder.getContext().authentication.authorities.any { authority -> authority.authority == "ROLE_ADMIN" }
+
 
     fun getAllChallenges(): List<Challenge> =
             challengeRepository.findAll().map(Challenge::from)
@@ -22,7 +27,8 @@ class ChallengeService {
                 challengeRepository.save(
                         ChallengeEntity(
                                 name = name,
-                                description = description
+                                description = description,
+                                createdBy = SecurityContextHolder.getContext().authentication.credentials as String
                         )
                 )
         )
@@ -31,21 +37,29 @@ class ChallengeService {
     fun updateChallenge(
             id: Long, name: String, description: String
     ): Challenge {
-        challengeRepository.getById(id).let {
-            it.description = description
-            it.name = name
+        val challengeToUpdate = challengeRepository.getById(id)
+        if (hasAccess(challengeToUpdate)) {
+            challengeToUpdate.description = description
+            challengeToUpdate.name = name
             return Challenge.from(
                     challengeRepository.save(
-                            it
+                            challengeToUpdate
                     )
             )
+        } else {
+            throw IllegalArgumentException("Current user cannot update this challenge")
         }
     }
 
     fun deleteChallenge(
             id: Long
     ) {
-        challengeRepository.deleteById(id)
+        val challengeToDelete = challengeRepository.getById(id)
+        if (hasAccess(challengeToDelete)) {
+            challengeRepository.delete(challengeToDelete)
+        } else {
+            throw IllegalArgumentException("Current user cannot delete this challenge")
+        }
     }
 
     fun exists(id: Long): Boolean = challengeRepository.existsById(id)
@@ -56,7 +70,7 @@ class ChallengeService {
             )
 
     companion object {
-        val CHALLENGE_ROLE = "challenge"
+        final val CHALLENGE_ROLE = "ROLE_CHALLENGE"
     }
 
 }

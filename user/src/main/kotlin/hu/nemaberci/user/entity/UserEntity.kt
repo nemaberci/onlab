@@ -15,7 +15,4 @@ class UserEntity(email: String) {
     @ManyToMany
     var roles: MutableList<RoleEntity> = mutableListOf();
 
-    @Column
-    var admin: Boolean = false;
-
 }

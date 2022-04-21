@@ -38,7 +38,12 @@ class UserGrpcService: UserServiceGrpc.UserServiceImplBase() {
     }
 
     private fun actuallyResigterRole(role: String): User.NoParams {
-        roleService.createRole(role)
+        try {
+            roleService.createRole(role)
+        } catch (e: Exception) {
+            println("Could not create role:")
+            e.printStackTrace()
+        }
         return User.NoParams.getDefaultInstance()
     }
 
