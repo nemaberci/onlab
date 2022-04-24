@@ -34,25 +34,6 @@ export const Solve: FC = () => {
   let client: ApolloClient<any>;
   let challengeClient: ApolloClient<any>;
 
-  // from: https://stackoverflow.com/questions/38552003/how-to-decode-jwt-token-in-javascript-without-using-a-library
-  function parseJwt(token: string | null | undefined) {
-    if (typeof token !== "string") {
-      return {};
-    }
-    var base64Url = token?.split(".")[1];
-    var base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
-    var jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split("")
-        .map(function (c) {
-          return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-        })
-        .join("")
-    );
-
-    return JSON.parse(jsonPayload);
-  }
-
   if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
     client = new ApolloClient({
       uri: "http://localhost:8080/graphql",
@@ -151,58 +132,6 @@ export const Solve: FC = () => {
     }
   });
 
-  async function onCreate(formData: any) {
-    let client: ApolloClient<any>;
-
-    if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
-      client = new ApolloClient({
-        uri: "http://localhost:8080/graphql",
-        cache: new InMemoryCache(),
-        headers: {
-          Authorization: `Token ${jwtService.getToken()}`,
-        },
-      });
-    } else {
-      client = new ApolloClient({
-        uri: "/solution/graphql",
-        cache: new InMemoryCache(),
-        headers: {
-          Authorization: `Token ${jwtService.getToken()}`,
-        },
-      });
-    }
-
-    if (jwtService.getToken() === null) {
-      return;
-    }
-
-    // TODO
-  }
-
-  async function onSave(formData: any) {
-    let client: ApolloClient<any>;
-
-    if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
-      client = new ApolloClient({
-        uri: "http://localhost:8080/graphql",
-        cache: new InMemoryCache(),
-        headers: {
-          Authorization: `Token ${jwtService.getToken()}`,
-        },
-      });
-    } else {
-      client = new ApolloClient({
-        uri: "/solution/graphql",
-        cache: new InMemoryCache(),
-        headers: {
-          Authorization: `Token ${jwtService.getToken()}`,
-        },
-      });
-    }
-
-    // TODO
-  }
-
   if (isLoading || challengeQuery.isLoading) {
     return (
       <Layout>
@@ -235,11 +164,13 @@ export const Solve: FC = () => {
       <Flex justifyContent={"center"}>
         <Table>
           <Thead>
-            <Th>Id</Th>
-            <Th>Language</Th>
-            <Th>Points</Th>
-            <Th>Result</Th>
-            <Th>Actions</Th>
+            <Tr>
+              <Th>Id</Th>
+              <Th>Language</Th>
+              <Th>Points</Th>
+              <Th>Result</Th>
+              <Th>Actions</Th>
+            </Tr>
           </Thead>
           <Tbody>
             {data.map &&
@@ -251,29 +182,41 @@ export const Solve: FC = () => {
                   result: Boolean | null;
                 }) => {
                   return (
-                    <Tr>
+                    <Tr key={solution.id as number}>
                       <Td>{solution.id}</Td>
                       <Td>{solution.language}</Td>
                       <Td>{solution.points || "Under review"}</Td>
-                      <Td>{solution.result ? (<CheckCircleIcon color={"green"}></CheckCircleIcon>) : (<CloseIcon color={"red"}></CloseIcon>) }</Td>
+                      <Td>
+                        {solution.result ? (
+                          <CheckCircleIcon color={"green"}></CheckCircleIcon>
+                        ) : (
+                          <CloseIcon color={"red"}></CloseIcon>
+                        )}
+                      </Td>
                       <Td>
                         {
-                          // has admin role
-                          parseJwt(jwtService.getToken() as string)
-                            .emailAddress === challengeQuery.data.createdBy && (
+                          jwtService.parseJwt()?.emailAddress ===
+                            challengeQuery.data.createdBy && (
                             <Button
                               variant={"ghost"}
                               colorScheme={"green"}
-                              onClick={() => {
-                                review(solution.id);
-                              }}
                             >
-                              <Link to={`/frontend/solution/review/${solution.id}`}>
+                              <Link
+                                to={`/frontend/solution/review/${solution.id}`}
+                              >
                                 Review
                               </Link>
                             </Button>
                           )
                         }
+
+                        <Button variant={"ghost"} colorScheme={"orange"}>
+                          <Link
+                            to={`/frontend/comment/solution/${solution.id}`}
+                          >
+                            Comments
+                          </Link>
+                        </Button>
                       </Td>
                     </Tr>
                   );

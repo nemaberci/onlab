@@ -116,7 +116,7 @@ export const Challenge: FC = () => {
         if (result.errors) {
             console.log("Error: ", result.errors)
         } else {
-            navigate('../challenges')
+            navigate(-1)
         }
 
     }
@@ -171,7 +171,7 @@ export const Challenge: FC = () => {
         if (result.errors) {
             console.log("Error: ", result.errors)
         } else {
-            navigate('../challenges')
+            navigate(-1)
         }
 
     }

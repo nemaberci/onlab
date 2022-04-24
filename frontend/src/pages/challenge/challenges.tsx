@@ -155,16 +155,18 @@ export const Challenges: FC = () => {
 
                     <Table>
                         <Thead>
-                            <Th>Id</Th>
-                            <Th>Name</Th>
-                            <Th>Description</Th>
-                            <Th>Created by</Th>
-                            <Th>Actions</Th>
+                            <Tr>
+                                <Th>Id</Th>
+                                <Th>Name</Th>
+                                <Th>Description</Th>
+                                <Th>Created by</Th>
+                                <Th>Actions</Th>
+                            </Tr>
                         </Thead>
                         <Tbody>
                             {data.map && data.map((challenge: {id: Number, name: String, description: String, createdBy: String}) => {
                                 return (
-                                    <Tr>
+                                    <Tr key={challenge.id as number}>
                                         <Td>{challenge.id}</Td>
                                         <Td>{challenge.name}</Td>
                                         <Td>{challenge.description}</Td>
@@ -181,6 +183,11 @@ export const Challenges: FC = () => {
                                             <Button variant={"ghost"} colorScheme={"green"}>
                                                 <Link to={`/frontend/challenge/solutions/${challenge.id}`}>
                                                     Solutions
+                                                </Link>
+                                            </Button>
+                                            <Button variant={"ghost"} colorScheme={"orange"}>
+                                                <Link to={`/frontend/comment/challenge/${challenge.id}`}>
+                                                    Comments
                                                 </Link>
                                             </Button>
                                         </Td>

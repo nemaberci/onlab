@@ -70,7 +70,7 @@ export const AddSolution: FC = () => {
         if (result.errors) {
             console.log("Error: ", result.errors)
         } else {
-            navigate(`../challenge/solutions/${params.id}`)
+            navigate(-1)
         }
 
     }
