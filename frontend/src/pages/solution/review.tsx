@@ -1,7 +1,6 @@
-import { FC } from "react";
-import { Layout } from "../../component/layout/layout";
+import { ApolloClient, gql, InMemoryCache } from "@apollo/client";
 import {
-    Badge,
+  Badge,
   Box,
   Button,
   Checkbox,
@@ -9,15 +8,14 @@ import {
   FormControl,
   FormErrorMessage,
   FormLabel,
-  Input,
-  Select,
-  Textarea,
+  Input, Textarea
 } from "@chakra-ui/react";
-import { Form, Formik, Field } from "formik";
-import { ApolloClient, gql, InMemoryCache } from "@apollo/client";
-import { jwtService } from "../../service/login";
+import { Field, Form, Formik } from "formik";
+import { FC } from "react";
 import { useQuery } from "react-query";
 import { useNavigate, useParams } from "react-router-dom";
+import { Layout } from "../../component/layout/layout";
+import { jwtService } from "../../service/login";
 
 export const Review: FC = () => {
   let navigate = useNavigate();
@@ -35,7 +33,7 @@ export const Review: FC = () => {
     });
   } else {
     client = new ApolloClient({
-      uri: "/challenge/graphql",
+      uri: "/solution/graphql",
       cache: new InMemoryCache(),
       headers: {
         Authorization: `Token ${jwtService.getToken()}`,
@@ -43,7 +41,7 @@ export const Review: FC = () => {
     });
   }
 
-  const { data, isError, isLoading, isSuccess } = useQuery(
+  const { data, isError, isLoading } = useQuery(
     "getSolution",
     async () => {
       if (jwtService.getToken() === null || !params || !params.id) {

@@ -1,11 +1,11 @@
-import {FC} from "react";
-import {Layout} from "../../component/layout/layout";
-import {Button, Flex, FormControl, FormErrorMessage, FormLabel, Input, Textarea, Box} from "@chakra-ui/react";
-import {Form, Formik, Field} from "formik";
-import {ApolloClient, gql, InMemoryCache} from "@apollo/client";
-import {jwtService} from "../../service/login";
-import {useQuery} from "react-query"
-import { useNavigate, useParams } from 'react-router-dom'
+import { ApolloClient, gql, InMemoryCache } from "@apollo/client";
+import { Box, Button, Flex, FormControl, FormErrorMessage, FormLabel, Textarea } from "@chakra-ui/react";
+import { Field, Form, Formik } from "formik";
+import { FC } from "react";
+import { useQuery } from "react-query";
+import { useNavigate, useParams } from 'react-router-dom';
+import { Layout } from "../../component/layout/layout";
+import { jwtService } from "../../service/login";
 
 
 
@@ -38,7 +38,7 @@ export const EditComment: FC = () => {
         
     }
 
-    const {data, isError, isLoading, isSuccess} = useQuery("getCommentData", async () => {
+    const {data, isError, isLoading} = useQuery("getCommentData", async () => {
 
         if (jwtService.getToken() === null) { return; }
 

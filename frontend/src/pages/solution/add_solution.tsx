@@ -1,11 +1,10 @@
-import {FC} from "react";
-import {Layout} from "../../component/layout/layout";
-import {Box, Button, Flex, FormControl, FormErrorMessage, FormLabel, Input, Select, Textarea} from "@chakra-ui/react";
-import {Form, Formik, Field} from "formik";
-import {ApolloClient, gql, InMemoryCache} from "@apollo/client";
-import {jwtService} from "../../service/login";
-import {useQuery} from "react-query"
-import { useNavigate, useParams } from 'react-router-dom'
+import { ApolloClient, gql, InMemoryCache } from "@apollo/client";
+import { Box, Button, FormControl, FormErrorMessage, FormLabel, Select, Textarea } from "@chakra-ui/react";
+import { Field, Form, Formik } from "formik";
+import { FC } from "react";
+import { useNavigate, useParams } from 'react-router-dom';
+import { Layout } from "../../component/layout/layout";
+import { jwtService } from "../../service/login";
 
 
 
@@ -33,7 +32,7 @@ export const AddSolution: FC = () => {
         } else {
 
             client = new ApolloClient({
-                uri: '/challenge/graphql',
+                uri: '/solution/graphql',
                 cache: new InMemoryCache(),
                 headers: {
                     'Authorization': `Token ${jwtService.getToken()}` 

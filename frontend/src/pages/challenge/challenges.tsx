@@ -1,7 +1,7 @@
 import {FC} from "react";
 import {Layout} from "../../component/layout/layout";
 import {jwtService} from "../../service/login";
-import {Button, Flex, Grid, Table, Tbody, Td, Th, Thead, Tr} from "@chakra-ui/react";
+import {Button, Flex, Table, Tbody, Td, Th, Thead, Tr} from "@chakra-ui/react";
 import {ApolloClient, gql, InMemoryCache} from "@apollo/client";
 import {useQuery} from "react-query"
 import {Link} from "react-router-dom";

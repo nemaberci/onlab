@@ -1,34 +1,21 @@
-import { FC } from "react";
-import { Layout } from "../../component/layout/layout";
-import { jwtService } from "../../service/login";
+import { ApolloClient, gql, InMemoryCache } from "@apollo/client";
+import { CheckCircleIcon, CloseIcon } from "@chakra-ui/icons";
 import {
   Button,
-  Flex,
-  Grid,
-  Icon,
-  Table,
+  Flex, Table,
   Tbody,
   Td,
   Th,
   Thead,
-  Tr,
+  Tr
 } from "@chakra-ui/react";
-import { ApolloClient, gql, InMemoryCache } from "@apollo/client";
+import { FC } from "react";
 import { useQuery } from "react-query";
-import { Link } from "react-router-dom";
-import {
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-  Input,
-  Textarea,
-} from "@chakra-ui/react";
-import { Form, Formik, Field } from "formik";
-import { useNavigate, useParams } from "react-router-dom";
-import { CheckCircleIcon, CloseIcon } from "@chakra-ui/icons";
+import { Link, useParams } from "react-router-dom";
+import { Layout } from "../../component/layout/layout";
+import { jwtService } from "../../service/login";
 
 export const Solve: FC = () => {
-  let navigate = useNavigate();
   let params = useParams();
 
   let client: ApolloClient<any>;
@@ -70,7 +57,7 @@ export const Solve: FC = () => {
     });
   }
 
-  const { data, isError, isLoading, isSuccess } = useQuery(
+  const { data, isError, isLoading } = useQuery(
     "getSolutions",
     async () => {
       if (jwtService.getToken() === null || !params || !params.id) {
@@ -151,8 +138,6 @@ export const Solve: FC = () => {
       </Layout>
     );
   }
-
-  function review(id: Number) {}
 
   return (
     <Layout>

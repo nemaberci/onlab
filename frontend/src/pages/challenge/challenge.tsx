@@ -38,7 +38,7 @@ export const Challenge: FC = () => {
         
     }
 
-    const {data, isError, isLoading, isSuccess} = useQuery("getChallenge", async () => {
+    const {data, isError, isLoading} = useQuery("getChallenge", async () => {
 
         if (jwtService.getToken() === null || !params || !params.id) { return; }
 

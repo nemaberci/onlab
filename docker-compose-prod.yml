@@ -3,6 +3,7 @@ version: '3'
 services:
   reverse-proxy:
     image: traefik:v2.6
+    restart: always
     ports:
       - "80:80"
       - "8080:8080"
@@ -18,10 +19,13 @@ services:
       - TRAEFIK_ENTRYPOINTS_user_ADDRESS=:9090
       - TRAEFIK_ENTRYPOINTS_challenge=true
       - TRAEFIK_ENTRYPOINTS_challenge_ADDRESS=:9091
+      - TRAEFIK_ENTRYPOINTS_solution=true
+      - TRAEFIK_ENTRYPOINTS_solution_ADDRESS=:9092
+      - TRAEFIK_ENTRYPOINTS_comment=true
+      - TRAEFIK_ENTRYPOINTS_comment_ADDRESS=:9093
       - TRAEFIK_API_INSECURE=true
       - TRAEFIK_API_DASHBOARD=true
       - TRAEFIK_PROVIDERS_DOCKER=true
-    restart: always
 
   challenge:
     image: onlabcontainerregistry.azurecr.io/challenge:latest
@@ -48,6 +52,33 @@ services:
     depends_on:
       - user
 
+  solution:
+    restart: always
+    image: onlabcontainerregistry.azurecr.io/solution:latest
+    ports:
+      - "8080"
+      - "9090"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.solution_graphql.entrypoints=web
+      - traefik.http.routers.solution_graphql.rule=PathPrefix(`/solution/graphql`)
+      - traefik.http.routers.solution_graphql.service=solution_graphql
+      - traefik.http.middlewares.solution-strip-prefix.stripprefix.prefixes=/solution
+      - traefik.http.routers.solution_graphql.middlewares=solution-strip-prefix@docker
+      - traefik.http.services.solution_graphql.loadbalancer.server.port=8080
+      - traefik.http.routers.solution_grpc.entrypoints=solution
+      - traefik.http.routers.solution_grpc.service=solution_grpc
+      - traefik.http.routers.solution_grpc.rule=ClientIP(`0.0.0.0/0`)
+      - traefik.http.services.solution_grpc.loadbalancer.server.port=9090
+      - traefik.http.services.solution_grpc.loadbalancer.server.scheme=h2c
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - GRPC_CLIENT_USERSERVICE_ADDRESS=dns:///reverse-proxy:9090
+      - GRPC_CLIENT_COMMENTSERVICE_ADDRESS=dns:///reverse-proxy:9093
+      - GRPC_CLIENT_CHALLENGESERVICE_ADDRESS=dns:///reverse-proxy:9091
+    depends_on:
+      - user
+
   user:
     image: onlabcontainerregistry.azurecr.io/user:latest
     restart: always
@@ -70,8 +101,32 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
 
+  comment:
+    image: onlabcontainerregistry.azurecr.io/comment:latest
+    restart: always
+    ports:
+      - "8080"
+      - "9090"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.comment_graphql.entrypoints=web
+      - traefik.http.routers.comment_graphql.rule=PathPrefix(`/comment/graphql`)
+      - traefik.http.routers.comment_graphql.service=comment_graphql
+      - traefik.http.middlewares.comment-strip-prefix.stripprefix.prefixes=/comment
+      - traefik.http.routers.comment_graphql.middlewares=comment-strip-prefix@docker
+      - traefik.http.services.comment_graphql.loadbalancer.server.port=8080
+      - traefik.http.routers.comment_grpc.entrypoints=comment
+      - traefik.http.routers.comment_grpc.service=comment_grpc
+      - traefik.http.routers.comment_grpc.rule=ClientIP(`0.0.0.0/0`)
+      - traefik.http.services.comment_grpc.loadbalancer.server.port=9090
+      - traefik.http.services.comment_grpc.loadbalancer.server.scheme=h2c
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - GRPC_CLIENT_USERSERVICE_ADDRESS=dns:///reverse-proxy:9090
+
   frontend:
     image: onlabcontainerregistry.azurecr.io/frontend:latest
+    restart: always
     ports:
       - "3000"
     labels:
@@ -86,7 +141,6 @@ services:
       - traefik.http.routers.frontend-manifest.rule=Path(`/manifest.json`)
       - traefik.http.routers.frontend-anything-else.entrypoints=web
       - traefik.http.routers.frontend-anything-else.rule=Path(`/{name:[a-z0-9A-Z]+}.png`, `/{name:[a-z0-9A-Z]+}.jpg`, `/{name:[a-z0-9A-Z]+}.js`, `/{name:[a-z0-9A-Z]+}.css`)
-    restart: always
 
   postgresql_challenge:
     image: postgres:alpine
@@ -96,7 +150,15 @@ services:
       POSTGRES_DB: challenge
     ports:
       - "5432"
-    restart: always
+
+  postgresql_solution:
+    image: postgres:alpine
+    environment:
+      POSTGRES_USER: postgres_admin
+      POSTGRES_PASSWORD: SECURE_PASSWORD
+      POSTGRES_DB: solution
+    ports:
+      - "5432"
 
   postgresql_user:
     image: postgres:alpine
@@ -106,4 +168,12 @@ services:
       POSTGRES_DB: user
     ports:
       - "5432"
-    restart: always
+
+  postgresql_comment:
+    image: postgres:alpine
+    environment:
+      POSTGRES_USER: postgres_admin
+      POSTGRES_PASSWORD: SECURE_PASSWORD
+      POSTGRES_DB: comment
+    ports:
+      - "5432"

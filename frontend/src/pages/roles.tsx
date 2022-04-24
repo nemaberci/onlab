@@ -1,20 +1,18 @@
-import { FC } from "react";
+import { ApolloClient, gql, InMemoryCache } from "@apollo/client";
 import {
   Button,
   Flex,
   Grid,
   Table,
   Tbody,
-  Td,
-  Th,
+  Td, Text, Th,
   Thead,
-  Tr,
-  Text
+  Tr
 } from "@chakra-ui/react";
+import { FC } from "react";
 import { useQuery } from "react-query";
 import { Layout } from "../component/layout/layout";
 import { jwtService } from "../service/login";
-import { ApolloClient, gql, InMemoryCache } from "@apollo/client";
 
 export const Roles: FC = () => {
   let client: ApolloClient<any>;

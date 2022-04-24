@@ -1,6 +1,6 @@
-import {FC} from "react";
-import {Button, Grid} from "@chakra-ui/react";
-import {Layout} from "../component/layout/layout";
+import { Grid } from "@chakra-ui/react";
+import { FC } from "react";
+import { Layout } from "../component/layout/layout";
 
 export const Index: FC = () => {
     return (

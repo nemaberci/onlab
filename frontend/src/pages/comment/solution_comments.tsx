@@ -1,34 +1,20 @@
-import { FC } from "react";
-import { Layout } from "../../component/layout/layout";
-import { jwtService } from "../../service/login";
+import { ApolloClient, gql, InMemoryCache } from "@apollo/client";
 import {
   Button,
-  Flex,
-  Grid,
-  Icon,
-  Table,
+  Flex, Table,
   Tbody,
   Td,
   Th,
   Thead,
-  Tr,
+  Tr
 } from "@chakra-ui/react";
-import { ApolloClient, gql, InMemoryCache } from "@apollo/client";
+import { FC } from "react";
 import { useQuery } from "react-query";
-import { Link } from "react-router-dom";
-import {
-  FormControl,
-  FormErrorMessage,
-  FormLabel,
-  Input,
-  Textarea,
-} from "@chakra-ui/react";
-import { Form, Formik, Field } from "formik";
-import { useNavigate, useParams } from "react-router-dom";
-import { CheckCircleIcon, CloseIcon } from "@chakra-ui/icons";
+import { Link, useParams } from "react-router-dom";
+import { Layout } from "../../component/layout/layout";
+import { jwtService } from "../../service/login";
 
 export const SolutionComments: FC = () => {
-  let navigate = useNavigate();
   let params = useParams();
 
   let client: ApolloClient<any>;

@@ -20,6 +20,8 @@ services:
       - TRAEFIK_ENTRYPOINTS_challenge_ADDRESS=:9091
       - TRAEFIK_ENTRYPOINTS_solution=true
       - TRAEFIK_ENTRYPOINTS_solution_ADDRESS=:9092
+      - TRAEFIK_ENTRYPOINTS_comment=true
+      - TRAEFIK_ENTRYPOINTS_comment_ADDRESS=:9093
       - TRAEFIK_API_INSECURE=true
       - TRAEFIK_API_DASHBOARD=true
       - TRAEFIK_PROVIDERS_DOCKER=true
@@ -76,6 +78,9 @@ services:
       - traefik.http.services.solution_grpc.loadbalancer.server.scheme=h2c
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+      - GRPC_CLIENT_USERSERVICE_ADDRESS=dns:///reverse-proxy:9090
+      - GRPC_CLIENT_COMMENTSERVICE_ADDRESS=dns:///reverse-proxy:9093
+      - GRPC_CLIENT_CHALLENGESERVICE_ADDRESS=dns:///reverse-proxy:9091
     depends_on:
       - user
 
@@ -103,6 +108,32 @@ services:
       - traefik.http.services.user_grpc.loadbalancer.server.scheme=h2c
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+
+  comment:
+    build:
+      context: ./comment
+      dockerfile: Dockerfile 
+    image: comment:latest
+    restart: always
+    ports:
+      - "8080"
+      - "9090"
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.comment_graphql.entrypoints=web
+      - traefik.http.routers.comment_graphql.rule=PathPrefix(`/comment/graphql`)
+      - traefik.http.routers.comment_graphql.service=comment_graphql
+      - traefik.http.middlewares.comment-strip-prefix.stripprefix.prefixes=/comment
+      - traefik.http.routers.comment_graphql.middlewares=comment-strip-prefix@docker
+      - traefik.http.services.comment_graphql.loadbalancer.server.port=8080
+      - traefik.http.routers.comment_grpc.entrypoints=comment
+      - traefik.http.routers.comment_grpc.service=comment_grpc
+      - traefik.http.routers.comment_grpc.rule=ClientIP(`0.0.0.0/0`)
+      - traefik.http.services.comment_grpc.loadbalancer.server.port=9090
+      - traefik.http.services.comment_grpc.loadbalancer.server.scheme=h2c
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - GRPC_CLIENT_USERSERVICE_ADDRESS=dns:///reverse-proxy:9090
 
   frontend:
     build:
@@ -148,5 +179,14 @@ services:
       POSTGRES_USER: postgres_admin
       POSTGRES_PASSWORD: SECURE_PASSWORD
       POSTGRES_DB: user
+    ports:
+      - "5432"
+
+  postgresql_comment:
+    image: postgres:alpine
+    environment:
+      POSTGRES_USER: postgres_admin
+      POSTGRES_PASSWORD: SECURE_PASSWORD
+      POSTGRES_DB: comment
     ports:
       - "5432"
