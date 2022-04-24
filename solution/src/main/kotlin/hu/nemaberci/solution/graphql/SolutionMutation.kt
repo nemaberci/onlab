@@ -1,6 +1,7 @@
 package hu.nemaberci.solution.graphql
 
 import graphql.kickstart.tools.GraphQLResolver
+import hu.nemaberci.solution.input.ReviewInput
 import hu.nemaberci.solution.input.SolutionInput
 import hu.nemaberci.solution.service.SolutionService
 import org.springframework.beans.factory.annotation.Autowired
@@ -23,5 +24,8 @@ class SolutionMutation : GraphQLResolver<SolutionMutation> {
 
     fun delete(id: Long) =
             solutionService.delete(id)
+
+    fun review(id: Long, @Valid reviewInput: ReviewInput) =
+            solutionService.review(id, reviewInput)
 
 }

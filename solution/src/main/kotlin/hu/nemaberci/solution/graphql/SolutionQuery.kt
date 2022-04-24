@@ -18,4 +18,7 @@ class SolutionQuery: GraphQLResolver<SolutionQuery> {
     fun byChallenge(id: Long): List<Solution> =
         solutionService.byChallengeId(id)
 
+    fun byId(id: Long): Solution =
+            solutionService.byId(id)
+
 }

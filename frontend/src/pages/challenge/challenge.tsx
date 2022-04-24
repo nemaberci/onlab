@@ -1,6 +1,6 @@
 import {FC} from "react";
 import {Layout} from "../../component/layout/layout";
-import {Button, Flex, FormControl, FormErrorMessage, FormLabel, Input, Textarea} from "@chakra-ui/react";
+import {Button, Flex, FormControl, FormErrorMessage, FormLabel, Input, Textarea, Box} from "@chakra-ui/react";
 import {Form, Formik, Field} from "formik";
 import {ApolloClient, gql, InMemoryCache} from "@apollo/client";
 import {jwtService} from "../../service/login";
@@ -38,7 +38,7 @@ export const Challenge: FC = () => {
         
     }
 
-    const {data, isError, isLoading, isSuccess} = useQuery("getChallenges", async () => {
+    const {data, isError, isLoading, isSuccess} = useQuery("getChallenge", async () => {
 
         if (jwtService.getToken() === null || !params || !params.id) { return; }
 
@@ -206,7 +206,7 @@ export const Challenge: FC = () => {
 
     return (
         <Layout>
-            <Flex p={"8"}>
+            <Box p={8}>
                 <Formik onSubmit={data ? onSave : onCreate} initialValues={{name: data ? data.name : "", description: data ? data.description : ""}} enableReinitialize>
                     <Form>
                         <Field name={"name"}>
@@ -220,10 +220,10 @@ export const Challenge: FC = () => {
                         </Field>
                         <Field name={"description"}>
                             {({ field, form }: any) => (
-                                <FormControl isInvalid={form.errors.name && form.touched.name}>
+                                <FormControl isInvalid={form.errors.description && form.touched.description}>
                                     <FormLabel htmlFor='description'>Description</FormLabel>
                                     <Textarea {...field} id='description' placeholder='Description' />
-                                    <FormErrorMessage>{form.errors.name}</FormErrorMessage>
+                                    <FormErrorMessage>{form.errors.description}</FormErrorMessage>
                                 </FormControl>
                             )}
                         </Field>
@@ -234,7 +234,7 @@ export const Challenge: FC = () => {
                         }
                     </Form>
                 </Formik>
-            </Flex>
+            </Box>
         </Layout>
     )
 }

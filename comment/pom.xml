@@ -88,6 +88,26 @@
             <artifactId>grpc-server-spring-boot-starter</artifactId>
             <version>2.13.1.RELEASE</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-config</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+            <version>3.19.1</version>
+        </dependency>
+        <dependency>
+            <groupId>net.devh</groupId>
+            <artifactId>grpc-client-spring-boot-starter</artifactId>
+            <version>2.13.1.RELEASE</version>
+        </dependency>
     </dependencies>
 
     <build>

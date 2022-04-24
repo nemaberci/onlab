@@ -178,6 +178,11 @@ export const Challenges: FC = () => {
                                                     Update
                                                 </Link>
                                             </Button>
+                                            <Button variant={"ghost"} colorScheme={"green"}>
+                                                <Link to={`/frontend/challenge/solutions/${challenge.id}`}>
+                                                    Solutions
+                                                </Link>
+                                            </Button>
                                         </Td>
                                     </Tr>
                                 )

@@ -1,7 +1,7 @@
 option java_package = "hu.nemaberci.comment.proto";
 
-message Id {
-    required int64 id = 1;
+message Email {
+    required string email = 1;
 }
 
 message Exists {
@@ -22,13 +22,20 @@ message Comment {
     required int64 id = 1;
     required string text = 2;
     required Owner owner = 3;
-    required int64 userId = 4;
+    required string createdBy = 4;
+}
+
+message CommentInput {
+    required string text = 1;
+    required Owner owner = 2;
+    required string createdBy = 3;
 }
 
 message NoParams {}
 
 service CommentService {
     rpc byOwner(Owner) returns (stream Comment) {}
-    rpc byUserId(Id) returns (stream Comment) {}
+    rpc byUser(Email) returns (stream Comment) {}
     rpc all(NoParams) returns (stream Comment) {}
+    rpc create(CommentInput) returns (NoParams) {}
 }

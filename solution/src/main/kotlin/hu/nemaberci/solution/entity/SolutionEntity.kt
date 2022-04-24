@@ -22,7 +22,16 @@ class SolutionEntity(
         var challengeId: Long,
 
         @Column
-        var result: Boolean
+        var result: Boolean,
+
+        @Column
+        var createdBy: String,
+
+        @Column(nullable = true)
+        var reviewedBy: String?,
+
+        @Column(nullable = true)
+        var points: Int?
 
 ) {
 

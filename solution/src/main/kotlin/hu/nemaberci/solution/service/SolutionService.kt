@@ -3,9 +3,12 @@ package hu.nemaberci.solution.service
 import hu.nemaberci.solution.dto.Solution
 import hu.nemaberci.solution.entity.SolutionEntity
 import hu.nemaberci.solution.grpc.ChallengeServiceClient
+import hu.nemaberci.solution.grpc.CommentServiceClient
+import hu.nemaberci.solution.input.ReviewInput
 import hu.nemaberci.solution.input.SolutionInput
 import hu.nemaberci.solution.repository.SolutionRepository
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Service
 import javax.annotation.PostConstruct
 
@@ -17,6 +20,9 @@ class SolutionService {
 
     @Autowired
     private lateinit var challengeServiceClient: ChallengeServiceClient
+
+    @Autowired
+    lateinit var commentServiceClient: CommentServiceClient
 
     fun getAll(): List<Solution> =
             solutionRepository.findAll().map(Solution::from)
@@ -32,7 +38,10 @@ class SolutionService {
                                 challengeId = solutionInput.challengeId,
                                 language = solutionInput.language,
                                 content = solutionInput.content,
-                                result = false
+                                result = false,
+                                createdBy = SecurityContextHolder.getContext().authentication.credentials as String,
+                                points = null,
+                                reviewedBy = null
                         )
                 )
         )
@@ -58,9 +67,29 @@ class SolutionService {
     fun byChallengeId(challengeId: Long): List<Solution> =
             solutionRepository.findAllByChallengeId(challengeId).map(Solution::from)
 
-    @PostConstruct
-    fun init() {
-        println("Hello world!")
+    fun byId(id: Long): Solution =
+            Solution.from(solutionRepository.getById(id))
+
+    fun review(solutionId: Long, reviewInput: ReviewInput): Solution {
+
+        var solution = solutionRepository.getById(solutionId)
+        solution.points = reviewInput.points
+        solution.result = reviewInput.result
+        solution.reviewedBy = SecurityContextHolder.getContext().authentication.credentials as String
+
+        reviewInput.comment?.let {
+            if (it.isNotEmpty()) {
+                commentServiceClient.createComment(solutionId, it)
+            }
+        }
+
+        solution = solutionRepository.save(solution)
+        return Solution.from(solution)
+
+    }
+
+    companion object {
+        const val ROLE_SOLUTION = "ROLE_SOLUTION"
     }
 
 }

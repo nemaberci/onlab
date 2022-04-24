@@ -70,7 +70,7 @@ class ChallengeService {
             )
 
     companion object {
-        final val CHALLENGE_ROLE = "ROLE_CHALLENGE"
+        const val CHALLENGE_ROLE = "ROLE_CHALLENGE"
     }
 
 }

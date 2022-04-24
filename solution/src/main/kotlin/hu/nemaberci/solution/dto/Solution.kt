@@ -8,7 +8,10 @@ data class Solution(
         var language: String,
         var content: String,
         var challengeId: Long,
-        var result: Boolean
+        var result: Boolean,
+        val createdBy: String,
+        val reviewedBy: String?,
+        val points: Int?
 ) {
     companion object {
         fun from(entity: SolutionEntity): Solution =
@@ -17,7 +20,10 @@ data class Solution(
                         entity.language,
                         entity.content,
                         entity.challengeId,
-                        entity.result
+                        entity.result,
+                        entity.createdBy,
+                        entity.reviewedBy,
+                        entity.points
                 )
     }
 }

@@ -1,41 +1,41 @@
 
-enum CommentOwner {
+enum CommentOwnerType {
     SOLUTION,
     CHALLENGE
 }
 
-type Owner {
-    id: ID
-    type: CommentOwner
+type CommentOwner {
+    id: ID!
+    type: CommentOwnerType!
 }
 
 type Comment {
-    id: ID
-    text: String
-    userId: ID
-    owner: Owner
+    id: ID!
+    text: String!
+    createdBy: String!
+    owner: CommentOwner!
 }
 
-input OwnerInput {
+input CommentOwnerInput {
     id: ID!
-    type: CommentOwner!
+    type: CommentOwnerType!
 }
 
 input CommentInput {
     text: String!
-    userId: ID!
-    owner: OwnerInput!
+    owner: CommentOwnerInput!
 }
 
 type CommentQuery {
     all: [Comment]
-    byOwner(owner: OwnerInput!): [Comment]
-    byUser(userId: ID!): [Comment]
+    byOwner(owner: CommentOwnerInput!): [Comment]
+    byUser(email: String!): [Comment]
+    byId(id: ID!): Comment
 }
 
 type CommentMutation {
     create(comment: CommentInput!): Comment
-    update(id: ID!, comment: CommentInput!): Comment
+    update(id: ID!, text: String!): Comment
     delete(id: ID!): Boolean
 }
 

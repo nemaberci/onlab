@@ -13,7 +13,7 @@ class BaseMutation: GraphQLMutationResolver {
     @Autowired
     private lateinit var challengeMutation: ChallengeMutation
 
-    @PreAuthorize("isAuthenticated() && hasRole('ROLE_CHALLENGE')")
+    @PreAuthorize("isAuthenticated() && hasRole('${ChallengeService.CHALLENGE_ROLE}')")
     fun challenge(env: DataFetchingEnvironment): ChallengeMutation {
         return challengeMutation
     }

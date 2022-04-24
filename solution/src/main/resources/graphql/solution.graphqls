@@ -1,9 +1,12 @@
 type Solution {
     id: ID!
     result: Boolean
-    language: String
+    language: String!
     content: String
     challengeId: ID!
+    createdBy: String!
+    reviewedBy: String
+    points: Int
 }
 
 input SolutionInput {
@@ -12,15 +15,23 @@ input SolutionInput {
     challengeId: ID!
 }
 
+input ReviewInput {
+    points: Int
+    comment: String
+    result: Boolean
+}
+
 type SolutionQuery {
     all: [Solution]
     byChallenge(id: ID!): [Solution]
+    byId(id: ID!): Solution
 }
 
 type SolutionMutation {
     create(solution: SolutionInput!): Solution
     update(id: ID!, solution: SolutionInput!): Solution
     delete(id: ID!): Boolean
+    review(id: ID!, review: ReviewInput!): Solution
 }
 
 extend type Query {

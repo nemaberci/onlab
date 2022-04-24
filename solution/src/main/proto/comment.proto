@@ -1,0 +1,37 @@
+option java_package = "hu.nemaberci.comment.proto";
+
+import "challenge.proto";
+
+message Email {
+    required string email = 1;
+}
+
+enum CommentOwner {
+    SOLUTION = 1;
+    CHALLENGE = 2;
+}
+
+message Owner {
+    required CommentOwner ownerType = 1;
+    required int64 ownerId = 2;
+}
+
+message Comment {
+    required int64 id = 1;
+    required string text = 2;
+    required Owner owner = 3;
+    required string createdBy = 4;
+}
+
+message CommentInput {
+    required string text = 1;
+    required Owner owner = 2;
+    required string createdBy = 3;
+}
+
+service CommentService {
+    rpc byOwner(Owner) returns (stream Comment) {}
+    rpc byUser(Email) returns (stream Comment) {}
+    rpc all(NoParams) returns (stream Comment) {}
+    rpc create(CommentInput) returns (NoParams) {}
+}
