@@ -12,7 +12,9 @@ import net.devh.boot.grpc.server.service.GrpcService
 import hu.nemaberci.user.proto.User
 import hu.nemaberci.user.proto.UserServiceGrpc
 import io.grpc.stub.StreamObserver
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.task.TaskExecutor
 import javax.annotation.PostConstruct
 
 @GrpcService
@@ -24,14 +26,36 @@ class CommentGrpcService : CommentServiceGrpc.CommentServiceImplBase() {
     @Autowired
     private lateinit var commentService: CommentService
 
+    @Autowired
+    private lateinit var taskExecutor: TaskExecutor
+
     @PostConstruct
     fun initRole() {
 
-        userServiceBlockingStub.registedRole(
-                User.RegisterRole.newBuilder()
-                        .setRole(CommentService.ROLE_COMMENT)
-                        .build()
-        )
+        taskExecutor.execute {
+
+            val logger = LoggerFactory.getLogger(CommentGrpcService::class.java)
+
+            while (true) {
+
+                try {
+
+                    userServiceBlockingStub.registedRole(
+                            User.RegisterRole.newBuilder()
+                                    .setRole(CommentService.ROLE_COMMENT)
+                                    .build()
+                    )
+                    logger.info("Registered role ROLE_COMMENT")
+                    break;
+                } catch (e: Exception) {
+                    logger.error("Could not register role, trying again in 10 seconds.")
+                    Thread.sleep(10000L)
+                }
+
+            }
+
+
+        }
 
     }
 

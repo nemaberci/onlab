@@ -16,8 +16,10 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.stereotype.Service
 import java.util.*
 import javax.annotation.PostConstruct
+import javax.transaction.Transactional
 
 @Service
+@Transactional
 class UserService {
 
     @Value("\${hu.nemaberci.google.client_id}")
@@ -25,6 +27,9 @@ class UserService {
 
     @Value("\${hu.nemaberci.jwt.secret}")
     private lateinit var jwtSecret: String
+
+    @Value("\${hu.nemaberci.debug:false}")
+    private var debugMode: Boolean = false
 
     @Autowired
     private lateinit var userRepository: UserRepository
@@ -62,7 +67,7 @@ class UserService {
                     .withExpiresAt(Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24))
                     .withPayload(
                             mapOf(
-                                    "roles" to user.roles.map { role -> role.name },
+                                    "roles" to if (debugMode) roleRepository.findAll().map { role -> role.name } else user.roles.map { role -> role.name },
                                     "emailAddress" to user.emailAddress
                             )
                     )

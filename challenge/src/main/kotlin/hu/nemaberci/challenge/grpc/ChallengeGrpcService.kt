@@ -8,7 +8,9 @@ import hu.nemaberci.user.proto.UserServiceGrpc
 import io.grpc.stub.StreamObserver
 import net.devh.boot.grpc.client.inject.GrpcClient
 import net.devh.boot.grpc.server.service.GrpcService
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.core.task.TaskExecutor
 import javax.annotation.PostConstruct
 
 @GrpcService
@@ -18,7 +20,10 @@ class ChallengeGrpcService: ChallengeServiceGrpc.ChallengeServiceImplBase() {
     private lateinit var userServiceBlockingStub: UserServiceGrpc.UserServiceBlockingStub
 
     @Autowired
-    lateinit var challengeService: ChallengeService
+    private lateinit var challengeService: ChallengeService
+
+    @Autowired
+    private lateinit var taskExecutor: TaskExecutor
 
     override fun challengeExists(request: ChallengeOuterClass.Id, responseObserver: StreamObserver<ChallengeOuterClass.Exists>) {
         responseObserver.onNext(doesChallengeExist(request.id))
@@ -60,11 +65,29 @@ class ChallengeGrpcService: ChallengeServiceGrpc.ChallengeServiceImplBase() {
     @PostConstruct
     fun createRoles() {
 
-        userServiceBlockingStub.registedRole(
-                User.RegisterRole.newBuilder()
-                        .setRole(ChallengeService.CHALLENGE_ROLE)
-                        .build()
-        )
+        taskExecutor.execute {
+
+            val logger = LoggerFactory.getLogger(ChallengeGrpcService::class.java)
+
+            while (true) {
+
+                try {
+                    userServiceBlockingStub.registedRole(
+                            User.RegisterRole.newBuilder()
+                                    .setRole(ChallengeService.CHALLENGE_ROLE)
+                                    .build()
+                    )
+                    logger.info("Registered role ROLE_CHALLENGE")
+                    break;
+                } catch (e: Exception) {
+                    logger.error("Could not register role, trying again in 10 seconds.")
+                    Thread.sleep(10000L)
+                }
+
+            }
+
+
+        }
 
     }
 

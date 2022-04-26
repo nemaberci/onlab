@@ -12,7 +12,7 @@ class UserEntity(email: String) {
     @Column(unique = true)
     var emailAddress: String = email;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     var roles: MutableList<RoleEntity> = mutableListOf();
 
 }

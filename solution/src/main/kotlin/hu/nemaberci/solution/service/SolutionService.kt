@@ -6,6 +6,7 @@ import hu.nemaberci.solution.grpc.ChallengeServiceClient
 import hu.nemaberci.solution.grpc.CommentServiceClient
 import hu.nemaberci.solution.input.ReviewInput
 import hu.nemaberci.solution.input.SolutionInput
+import hu.nemaberci.solution.message.MessageQueueSender
 import hu.nemaberci.solution.repository.SolutionRepository
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.security.core.context.SecurityContextHolder
@@ -23,6 +24,9 @@ class SolutionService {
 
     @Autowired
     lateinit var commentServiceClient: CommentServiceClient
+
+    @Autowired
+    lateinit var messageQueueSender: MessageQueueSender
 
     fun getAll(): List<Solution> =
             solutionRepository.findAll().map(Solution::from)
@@ -79,7 +83,8 @@ class SolutionService {
 
         reviewInput.comment?.let {
             if (it.isNotEmpty()) {
-                commentServiceClient.createComment(solutionId, it)
+                // commentServiceClient.createComment(solutionId, it)
+                messageQueueSender.createMessage(solutionId, it)
             }
         }
 
