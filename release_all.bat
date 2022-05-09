@@ -1,5 +1,5 @@
-start /b call ./challenge/release.bat
-start /b call ./frontend/release.bat
-start /b call ./user/release.bat
-start /b call ./solution/release.bat
-start /b call ./comment/release.bat
+call ./challenge/release.bat
+call ./frontend/release.bat
+call ./user/release.bat
+call ./solution/release.bat
+call ./comment/release.bat

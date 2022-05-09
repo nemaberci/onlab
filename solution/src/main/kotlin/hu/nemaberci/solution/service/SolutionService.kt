@@ -83,10 +83,10 @@ class SolutionService {
 
         reviewInput.comment?.let {
             if (it.isNotEmpty()) {
-                // commentServiceClient.createComment(solutionId, it)
-                messageQueueSender.createMessage(solutionId, it)
+                commentServiceClient.createComment(solutionId, it)
             }
         }
+        messageQueueSender.createMessage(solution, reviewInput.comment)
 
         solution = solutionRepository.save(solution)
         return Solution.from(solution)

@@ -1,6 +1,7 @@
 package hu.nemaberci.solution.message
 
 import hu.nemaberci.solution.SolutionApplication
+import hu.nemaberci.solution.entity.SolutionEntity
 import hu.nemaberci.solution.grpc.SolutionGrpcService
 import org.springframework.amqp.rabbit.core.RabbitTemplate
 import org.springframework.beans.factory.annotation.Autowired
@@ -13,14 +14,16 @@ class MessageQueueSender {
     @Autowired
     lateinit var rabbitTemplate: RabbitTemplate
 
-    fun createMessage(solutionId: Long, text: String) {
+    fun createMessage(solution: SolutionEntity, text: String?) {
+
+        val sentText = text ?: ""
 
         rabbitTemplate.convertAndSend(
                 SolutionApplication.message_queue_name,
                 mapOf(
-                        "id" to solutionId.toString(),
-                        "text" to text,
-                        "emailAddress" to SecurityContextHolder.getContext().authentication.credentials as String
+                        "to" to solution.createdBy,
+                        "text" to sentText,
+                        "reviewedBy" to SecurityContextHolder.getContext().authentication.credentials as String
                 )
         )
 

@@ -51,7 +51,7 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
       - GRPC_CLIENT_USERSERVICE_ADDRESS=dns:///reverse-proxy:9090
       - SPRING_DATASOURCE_USERNAME=nemaberci
-      - SPRING_DATASOURCE_PASSWORD=Dtg.@N6@zhxUYZ9
+      - SPRING_DATASOURCE_PASSWORD=ophOJHIteno:-,8
     depends_on:
       - user
 
@@ -80,7 +80,7 @@ services:
       - GRPC_CLIENT_COMMENTSERVICE_ADDRESS=dns:///reverse-proxy:9093
       - GRPC_CLIENT_CHALLENGESERVICE_ADDRESS=dns:///reverse-proxy:9091
       - SPRING_DATASOURCE_USERNAME=nemaberci
-      - SPRING_DATASOURCE_PASSWORD=Dtg.@N6@zhxUYZ9
+      - SPRING_DATASOURCE_PASSWORD=ophOJHIteno:-,8
     depends_on:
       - user
 
@@ -106,7 +106,7 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - SPRING_DATASOURCE_USERNAME=nemaberci
-      - SPRING_DATASOURCE_PASSWORD=Dtg.@N6@zhxUYZ9
+      - SPRING_DATASOURCE_PASSWORD=ophOJHIteno:-,8
 
   comment:
     image: onlabcontainerregistry.azurecr.io/comment:latest
@@ -131,7 +131,7 @@ services:
       - SPRING_PROFILES_ACTIVE=docker
       - GRPC_CLIENT_USERSERVICE_ADDRESS=dns:///reverse-proxy:9090
       - SPRING_DATASOURCE_USERNAME=nemaberci
-      - SPRING_DATASOURCE_PASSWORD=Dtg.@N6@zhxUYZ9
+      - SPRING_DATASOURCE_PASSWORD=ophOJHIteno:-,8
 
   frontend:
     image: onlabcontainerregistry.azurecr.io/frontend:latest

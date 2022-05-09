@@ -1,0 +1,16 @@
+{
+  "name": "mailer",
+  "version": "1.0.0",
+  "description": "Recieves RabbitMQ messages and creates emails from them",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "amqplib": "^0.8.0",
+    "node-fetch": "^2.6.7"
+  }
+}
