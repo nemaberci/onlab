@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository
 @Repository
 interface SolutionRepository: JpaRepository<SolutionEntity, Long> {
     fun findAllByChallengeId(challengeId: Long): List<SolutionEntity>
+    fun findAllByCreatedBy(email: String): List<SolutionEntity>
 }

@@ -4,6 +4,7 @@ import { Field, Form, Formik } from "formik";
 import { FC } from "react";
 import { useNavigate, useParams } from 'react-router-dom';
 import { Layout } from "../../component/layout/layout";
+import { loadingService } from "../../service/loading";
 import { jwtService } from "../../service/login";
 
 
@@ -44,6 +45,7 @@ export const AddSolution: FC = () => {
         if (jwtService.getToken() === null) {
             return;
         }
+        loadingService.loading = true;
 
         let result = await client.mutate({
             mutation: gql`
@@ -65,6 +67,7 @@ export const AddSolution: FC = () => {
                 language: formData.language
             }
         });
+        loadingService.loading = false;
 
         if (result.errors) {
             console.log("Error: ", result.errors)

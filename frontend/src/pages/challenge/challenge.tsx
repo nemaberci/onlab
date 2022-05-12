@@ -6,6 +6,7 @@ import {ApolloClient, gql, InMemoryCache} from "@apollo/client";
 import {jwtService} from "../../service/login";
 import {useQuery} from "react-query"
 import { useNavigate, useParams } from 'react-router-dom'
+import { loadingService } from "../../service/loading";
 
 
 
@@ -42,6 +43,8 @@ export const Challenge: FC = () => {
 
         if (jwtService.getToken() === null || !params || !params.id) { return; }
 
+        loadingService.loading = true;
+
         let result = await client.query({
             query: gql`
                 query GetChallenge ($id: ID!) {
@@ -57,6 +60,8 @@ export const Challenge: FC = () => {
                 id: params.id
             }
         });
+
+        loadingService.loading = false;
 
         if (result.error || result.errors) {
             console.log("Error: ", result.error, result.errors)
@@ -96,6 +101,7 @@ export const Challenge: FC = () => {
         if (jwtService.getToken() === null) {
             return;
         }
+        loadingService.loading = true;
 
         let result = await client.mutate({
             mutation: gql`
@@ -112,6 +118,7 @@ export const Challenge: FC = () => {
                 description: formData.description
             }
         });
+        loadingService.loading = false;
 
         if (result.errors) {
             console.log("Error: ", result.errors)
@@ -151,6 +158,7 @@ export const Challenge: FC = () => {
             return;
         }
 
+        loadingService.loading = true;
         let result = await client.mutate({
             mutation: gql`
                 mutation UpdateChallenge($id: ID!, $name: String!, $description: String!) {
@@ -167,6 +175,7 @@ export const Challenge: FC = () => {
                 description: formData.description
             }
         });
+        loadingService.loading = false;
 
         if (result.errors) {
             console.log("Error: ", result.errors)

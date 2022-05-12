@@ -31,8 +31,6 @@ class JwtService {
         })
         .join("")
     );
-
-    console.log("Parsed: ", jsonPayload);
     return JSON.parse(jsonPayload);
   }
 }

@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository
 
 @Repository
 interface ChallengeRepository: JpaRepository<ChallengeEntity, Long> {
+    fun findAllByCreatedBy(createdBy: String): List<ChallengeEntity>
 }

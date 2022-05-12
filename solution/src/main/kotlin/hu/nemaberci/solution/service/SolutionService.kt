@@ -93,6 +93,9 @@ class SolutionService {
 
     }
 
+    fun byEmail(email: String): List<Solution> =
+            solutionRepository.findAllByCreatedBy(email).map(Solution::from)
+
     companion object {
         const val ROLE_SOLUTION = "ROLE_SOLUTION"
     }

@@ -69,6 +69,9 @@ class ChallengeService {
                     challengeRepository.getById(id)
             )
 
+    fun byEmail(email: String): List<Challenge> =
+            challengeRepository.findAllByCreatedBy(email).map(Challenge::from)
+
     companion object {
         const val CHALLENGE_ROLE = "ROLE_CHALLENGE"
     }

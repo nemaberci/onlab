@@ -1,23 +1,36 @@
 import { ApolloClient, gql, InMemoryCache } from "@apollo/client";
+import { SettingsIcon, DeleteIcon, EditIcon } from "@chakra-ui/icons";
 import {
+  Alert,
+  Box,
   Button,
-  Flex, Table,
+  Flex,
+  HStack,
+  IconButton,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
+  Table,
   Tbody,
   Td,
   Th,
   Thead,
-  Tr
+  Tr,
 } from "@chakra-ui/react";
 import { FC } from "react";
 import { useQuery } from "react-query";
-import { Link, useParams } from "react-router-dom";
+import { Link, useNavigate, useParams } from "react-router-dom";
 import { Layout } from "../../component/layout/layout";
+import { loadingService } from "../../service/loading";
 import { jwtService } from "../../service/login";
 
-export const SolutionComments: FC = () => {
-  let params = useParams();
+export const SolutionComments: FC<{
+  solutionId: Number | String
+}> = ({solutionId}) => {
 
   let client: ApolloClient<any>;
+  let navigate = useNavigate();
 
   if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
     client = new ApolloClient({
@@ -38,11 +51,12 @@ export const SolutionComments: FC = () => {
   }
 
   const { data, isError, isLoading, refetch } = useQuery(
-    "getSolutionComments",
+    ["getSolutionComments", solutionId],
     async () => {
       if (jwtService.getToken() === null) {
         return;
       }
+      loadingService.loading = true;
 
       let result = await client.query({
         query: gql`
@@ -57,9 +71,10 @@ export const SolutionComments: FC = () => {
           }
         `,
         variables: {
-          id: params.id,
+          id: solutionId,
         },
       });
+      loadingService.loading = false;
 
       if (result.error || result.errors) {
         console.log("Error: ", result.error, result.errors);
@@ -71,21 +86,17 @@ export const SolutionComments: FC = () => {
 
   if (isLoading) {
     return (
-      <Layout>
         <Flex justifyContent={"center"}>
           <h2>Loading...</h2>
         </Flex>
-      </Layout>
     );
   }
 
   if (isError) {
     return (
-      <Layout>
         <Flex justifyContent={"center"}>
           <h2>Error fetching data. Please reload the page.</h2>
         </Flex>
-      </Layout>
     );
   }
 
@@ -93,6 +104,7 @@ export const SolutionComments: FC = () => {
     if (jwtService.getToken() === null) {
       return;
     }
+    loadingService.loading = true;
 
     await client.mutate({
       mutation: gql`
@@ -108,91 +120,83 @@ export const SolutionComments: FC = () => {
     });
 
     await refetch();
+    loadingService.loading = false;
   }
 
   if (jwtService.getToken() === null) {
     return (
-      <Layout>
         <Flex justifyContent={"center"}>
           <h2>Log in to view comments!</h2>
         </Flex>
-      </Layout>
     );
   } else {
     if (!data) {
       return (
-        <Layout>
           <Flex justifyContent={"center"}>
             <h2>You do not have rights to view comments!</h2>
           </Flex>
-        </Layout>
       );
     }
 
     return (
-      <Layout>
-        <Flex p={"5"}>
-          <Button variant={"ghost"} colorScheme={"yellow"}>
-            <Link to={`/frontend/comment/new/solution/${params.id}`}>
-              New Comment
-            </Link>
-          </Button>
-        </Flex>
-        <Flex justifyContent={"center"}>
-          <Table>
-            <Thead>
-              <Tr>
-                <Th>Id</Th>
-                <Th>Text</Th>
-                <Th>Created by</Th>
-                <Th>Actions</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {data.map &&
-                data.map(
-                  (comment: {
-                    id: Number;
-                    text: String;
-                    createdBy: String;
-                  }) => {
-                    return (
-                      <Tr key={comment.id as number}>
-                        <Td>{comment.id}</Td>
-                        <Td>{comment.text}</Td>
-                        <Td>{comment.createdBy}</Td>
-                        <Td>
-                          {jwtService.parseJwt()?.emailAddress ===
-                            comment.createdBy && (
-                            <Button
-                              variant={"ghost"}
-                              colorScheme={"red"}
-                              onClick={() => {
-                                deleteComment(comment.id);
-                              }}
-                            >
-                              Delete
-                            </Button>
-                          )}
-                          {jwtService.parseJwt()?.emailAddress ===
-                            comment.createdBy && (
-                            <Button variant={"ghost"} colorScheme={"blue"}>
-                              <Link
-                                to={`/frontend/comment/update/${comment.id}`}
-                              >
-                                Update
-                              </Link>
-                            </Button>
-                          )}
-                        </Td>
-                      </Tr>
-                    );
-                  }
-                )}
-            </Tbody>
-          </Table>
-        </Flex>
-      </Layout>
+      <>
+      {
+        data.length == 0 && (
+          <Flex justifyContent={"center"}>
+            Looks like there are no comments here yet.
+          </Flex>
+        )
+      }
+        {data.map &&
+          data.map(
+            (comment: { id: Number; text: String; createdBy: String }) => {
+              return (
+                <Alert width={"100%"} p={4} variant="left-accent" position={"initial"} key={comment.id as number}>
+                  <Box fontSize={"1rem"} fontWeight="bold">
+                    {comment.createdBy}
+                  </Box>
+                  <Box
+                    fontSize={"0.8rem"}
+                    px={5}
+                    wordBreak="break-all"
+                    flex={1}
+                  >
+                    {comment.text}
+                  </Box>
+                  <Menu>
+                    <MenuButton
+                      as={IconButton}
+                      aria-label="Options"
+                      icon={<SettingsIcon />}
+                      variant="outline"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <MenuList>
+                      <MenuItem
+                        icon={<DeleteIcon />}
+                        onClick={(e) => {
+                          deleteComment(comment.id);
+                          e.stopPropagation();
+                        }}
+                      >
+                        Delete
+                      </MenuItem>
+                      <MenuItem
+                        icon={<EditIcon />}
+                        onClick={(e) => {
+                          navigate(`/frontend/comment/update/${comment.id}`);
+                          e.stopPropagation();
+                        }}
+                      >
+                        Update
+                      </MenuItem>
+                    </MenuList>
+                  </Menu>
+                </Alert>
+              );
+            }
+          )}
+      </>
     );
   }
 };

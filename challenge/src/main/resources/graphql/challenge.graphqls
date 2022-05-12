@@ -12,6 +12,7 @@ input ChallengeInput {
 
 type ChallengeQuery {
     all: [Challenge]
+    byEmail(email: String!): [Challenge]
     byId(id: ID!): Challenge
 }
 

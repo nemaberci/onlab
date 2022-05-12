@@ -21,4 +21,7 @@ class SolutionQuery: GraphQLResolver<SolutionQuery> {
     fun byId(id: Long): Solution =
             solutionService.byId(id)
 
+    fun byEmail(email: String): List<Solution> =
+            solutionService.byEmail(email)
+
 }

@@ -226,6 +226,7 @@ export const Roles: FC = () => {
                               user.roles.find(userRole => userRole.name === role.name) ? (
                                 <Button
                                   variant={"ghost"}
+                                  colorScheme="red"
                                   onClick={() => delete_role(user.id, role.name)}
                                 >
                                   <Text display="block">Delete {role.name} right</Text>
@@ -233,6 +234,7 @@ export const Roles: FC = () => {
                               ) : (
                                 <Button
                                   variant={"ghost"}
+                                  colorScheme="green"
                                   onClick={() => add_role(user.id, role.name)}
                                 >
                                   <Text display="block">Add {role.name} right</Text>

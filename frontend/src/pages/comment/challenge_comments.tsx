@@ -1,23 +1,27 @@
 import { ApolloClient, gql, InMemoryCache } from "@apollo/client";
+import { DeleteIcon, EditIcon, SettingsIcon } from "@chakra-ui/icons";
 import {
-  Button,
-  Flex, Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr
+  Alert,
+  Box,
+  Flex,
+  HStack,
+  IconButton,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuList,
 } from "@chakra-ui/react";
 import { FC } from "react";
 import { useQuery } from "react-query";
-import { Link, useParams } from "react-router-dom";
-import { Layout } from "../../component/layout/layout";
+import { useNavigate } from "react-router-dom";
+import { loadingService } from "../../service/loading";
 import { jwtService } from "../../service/login";
 
-export const ChallengeComments: FC = () => {
-  let params = useParams();
-
+export const ChallengeComments: FC<{
+  challengeId: String | Number;
+}> = ({ challengeId }) => {
   let client: ApolloClient<any>;
+  let navigate = useNavigate();
 
   if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
     client = new ApolloClient({
@@ -25,6 +29,11 @@ export const ChallengeComments: FC = () => {
       cache: new InMemoryCache(),
       headers: {
         Authorization: `Token ${jwtService.getToken()}`,
+      },
+      defaultOptions: {
+        query: {
+          errorPolicy: "all",
+        },
       },
     });
   } else {
@@ -34,11 +43,16 @@ export const ChallengeComments: FC = () => {
       headers: {
         Authorization: `Token ${jwtService.getToken()}`,
       },
+      defaultOptions: {
+        query: {
+          errorPolicy: "all",
+        },
+      },
     });
   }
 
   const { data, isError, isLoading, refetch } = useQuery(
-    "getChallengeComments",
+    [`getChallengeComments`, challengeId],
     async () => {
       if (jwtService.getToken() === null) {
         return;
@@ -57,7 +71,7 @@ export const ChallengeComments: FC = () => {
           }
         `,
         variables: {
-          id: params.id,
+          id: challengeId,
         },
       });
 
@@ -71,128 +85,126 @@ export const ChallengeComments: FC = () => {
 
   if (isLoading) {
     return (
-      <Layout>
-        <Flex justifyContent={"center"}>
-          <h2>Loading...</h2>
-        </Flex>
-      </Layout>
+      <Flex justifyContent={"center"}>
+        <h2>Loading...</h2>
+      </Flex>
     );
   }
 
   if (isError) {
     return (
-      <Layout>
-        <Flex justifyContent={"center"}>
-          <h2>Error fetching data. Please reload the page.</h2>
-        </Flex>
-      </Layout>
+      <Flex justifyContent={"center"}>
+        <h2>Error fetching data. Please reload the page.</h2>
+      </Flex>
     );
   }
 
-  async function deleteComment(id: String | Number) {
+  function deleteComment(id: String | Number) {
     if (jwtService.getToken() === null) {
       return;
     }
+    console.log("Deleting comment");
+    loadingService.loading = true;
 
-    await client.mutate({
-      mutation: gql`
-        mutation DeleteComment($id: ID!) {
-          comment {
-            delete(id: $id)
+    client
+      .mutate({
+        mutation: gql`
+          mutation DeleteComment($id: ID!) {
+            comment {
+              delete(id: $id)
+            }
           }
-        }
-      `,
-      variables: {
-        id: id,
-      },
-    });
-
-    await refetch();
+        `,
+        variables: {
+          id: id,
+        },
+      })
+      .then(() => {
+        refetch().then(() => {
+          console.log("Comment deleted");
+          loadingService.loading = false;
+        });
+      });
   }
 
   if (jwtService.getToken() === null) {
     return (
-      <Layout>
-        <Flex justifyContent={"center"}>
-          <h2>Log in to view comments!</h2>
-        </Flex>
-      </Layout>
+      <Flex justifyContent={"center"}>
+        <h2>Log in to view comments!</h2>
+      </Flex>
     );
   } else {
     if (!data) {
       return (
-        <Layout>
-          <Flex justifyContent={"center"}>
-            <h2>You do not have rights to view comments!</h2>
-          </Flex>
-        </Layout>
+        <Flex justifyContent={"center"}>
+          <h2>You do not have rights to view comments!</h2>
+        </Flex>
       );
     }
 
     return (
-      <Layout>
-        <Flex p={"5"}>
-          <Button variant={"ghost"} colorScheme={"yellow"}>
-            <Link to={`/frontend/comment/new/challenge/${params.id}`}>
-              New Comment
-            </Link>
-          </Button>
-        </Flex>
-        <Flex justifyContent={"center"}>
-          <Table>
-            <Thead>
-              <Tr>
-                <Th>Id</Th>
-                <Th>Text</Th>
-                <Th>Created by</Th>
-                <Th>Actions</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {data.map &&
-                data.map(
-                  (comment: {
-                    id: Number;
-                    text: String;
-                    createdBy: String;
-                  }) => {
-                    return (
-                      <Tr key={comment.id as number}>
-                        <Td>{comment.id}</Td>
-                        <Td>{comment.text}</Td>
-                        <Td>{comment.createdBy}</Td>
-                        <Td>
-                          {jwtService.parseJwt()?.emailAddress ===
-                            comment.createdBy && (
-                            <Button
-                              variant={"ghost"}
-                              colorScheme={"red"}
-                              onClick={() => {
-                                deleteComment(comment.id);
-                              }}
-                            >
-                              Delete
-                            </Button>
-                          )}
-                          {jwtService.parseJwt()?.emailAddress ===
-                            comment.createdBy && (
-                            <Button variant={"ghost"} colorScheme={"blue"}>
-                              <Link
-                                to={`/frontend/comment/update/${comment.id}`}
-                              >
-                                Update
-                              </Link>
-                            </Button>
-                          )}
-                        </Td>
-                      </Tr>
-                    );
-                  }
-                )}
-            </Tbody>
-          </Table>
-        </Flex>
-      </Layout>
+      <>
+        {(!data.length || (data.length && data.length < 1)) && (
+          <HStack justifyContent={"center"}>
+            Looks like there are no comments here yet.
+          </HStack>
+        )}
+        {data.map &&
+          data.map(
+            (comment: { id: Number; text: String; createdBy: String }) => {
+              return (
+                <Alert
+                  width={"100%"}
+                  p={4}
+                  variant="left-accent"
+                  position={"initial"}
+                  key={comment.id as number}
+                >
+                  <Box fontSize={"1rem"} fontWeight="bold">
+                    {comment.createdBy}
+                  </Box>
+                  <Box
+                    fontSize={"0.8rem"}
+                    px={5}
+                    wordBreak="break-all"
+                    flex={1}
+                  >
+                    {comment.text}
+                  </Box>
+                  <Menu>
+                    <MenuButton
+                      as={IconButton}
+                      aria-label="Options"
+                      icon={<SettingsIcon />}
+                      variant="outline"
+                      onClick={(e) => e.stopPropagation()}
+                    />
+                    <MenuList>
+                      <MenuItem
+                        icon={<DeleteIcon />}
+                        onClick={(e) => {
+                          deleteComment(comment.id);
+                          e.stopPropagation();
+                        }}
+                      >
+                        Delete
+                      </MenuItem>
+                      <MenuItem
+                        icon={<EditIcon />}
+                        onClick={(e) => {
+                          navigate(`/frontend/comment/update/${comment.id}`);
+                          e.stopPropagation();
+                        }}
+                      >
+                        Update
+                      </MenuItem>
+                    </MenuList>
+                  </Menu>
+                </Alert>
+              );
+            }
+          )}
+      </>
     );
   }
 };

@@ -24,6 +24,7 @@ input ReviewInput {
 type SolutionQuery {
     all: [Solution]
     byChallenge(id: ID!): [Solution]
+    byEmail(email: String!): [Solution]
     byId(id: ID!): Solution
 }
 

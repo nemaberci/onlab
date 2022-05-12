@@ -18,4 +18,6 @@ class ChallengeQuery: GraphQLResolver<ChallengeQuery> {
 
     fun byId(id: Long): Challenge = challengeService.byId(id)
 
+    fun byEmail(email: String): List<Challenge> = challengeService.byEmail(email)
+
 }

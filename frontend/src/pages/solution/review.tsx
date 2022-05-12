@@ -15,6 +15,7 @@ import { FC } from "react";
 import { useQuery } from "react-query";
 import { useNavigate, useParams } from "react-router-dom";
 import { Layout } from "../../component/layout/layout";
+import { loadingService } from "../../service/loading";
 import { jwtService } from "../../service/login";
 
 export const Review: FC = () => {
@@ -48,6 +49,7 @@ export const Review: FC = () => {
         return;
       }
 
+      loadingService.loading = true;
       let result = await client.query({
         query: gql`
           query GetSolution($id: ID!) {
@@ -64,6 +66,7 @@ export const Review: FC = () => {
           id: params.id,
         },
       });
+      loadingService.loading = false;
 
       if (result.error || result.errors) {
         console.log("Error: ", result.error, result.errors);
@@ -81,6 +84,7 @@ export const Review: FC = () => {
       return;
     }
 
+    loadingService.loading = true;
     let result = await client.mutate({
       mutation: gql`
         mutation ReviewSolution(
@@ -106,6 +110,7 @@ export const Review: FC = () => {
           }
       },
     });
+    loadingService.loading = false;
 
     if (result.errors) {
       console.log("Error: ", result.errors);
