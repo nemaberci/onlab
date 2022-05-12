@@ -160,3 +160,12 @@ services:
       - traefik.http.routers.rabbitmq.entrypoints=rabbitmq
       - traefik.http.routers.rabbitmq.service=rabbitmq
       - traefik.http.services.rabbitmq.loadbalancer.server.port=5672
+
+  mailer:
+    image: onlabcontainerregistry.azurecr.io/mailer:latest
+    ports:
+      - "443:443"
+    environment:
+      - CONNECTION_STRING=amqp://rabbitmq
+      - API_KEY=api-version=2016-10-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=beMNzKhtukOMf7EEymdjv9lVmtpzH3BXAVNy-krJcvU
+    restart: always

@@ -1,6 +1,13 @@
-import { FC } from "react";
-import { Layout } from "../../component/layout/layout";
-import { jwtService } from "../../service/login";
+import { ApolloClient, gql, InMemoryCache } from "@apollo/client";
+import {
+  AddIcon,
+  CheckIcon,
+  CloseIcon,
+  DeleteIcon,
+  EditIcon,
+  SettingsIcon,
+  ViewIcon,
+} from "@chakra-ui/icons";
 import {
   Accordion,
   AccordionButton,
@@ -16,29 +23,13 @@ import {
   MenuGroup,
   MenuItem,
   MenuList,
-  Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
 } from "@chakra-ui/react";
-import { ApolloClient, gql, InMemoryCache } from "@apollo/client";
+import { FC } from "react";
 import { useQuery } from "react-query";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { Layout } from "../../component/layout/layout";
 import { loadingService } from "../../service/loading";
-import {
-  SettingsIcon,
-  DeleteIcon,
-  EditIcon,
-  QuestionIcon,
-  CheckIcon,
-  AddIcon,
-  ViewIcon,
-  CloseIcon,
-} from "@chakra-ui/icons";
-import { ChallengeComments } from "../comment/challenge_comments";
-import { isCallOrNewExpression } from "typescript";
+import { jwtService } from "../../service/login";
 import { SolutionComments } from "../comment/solution_comments";
 
 export const Solutions: FC = () => {
@@ -49,7 +40,7 @@ export const Solutions: FC = () => {
 
   if (!process.env.NODE_ENV || process.env.NODE_ENV === "development") {
     client = new ApolloClient({
-      uri: 'http://localhost:8080/graphql',
+      uri: "http://localhost:8080/graphql",
       cache: new InMemoryCache(),
       headers: {
         Authorization: `Token ${jwtService.getToken()}`,
@@ -71,7 +62,7 @@ export const Solutions: FC = () => {
           errorPolicy: "all",
         },
       },
-    })
+    });
   } else {
     client = new ApolloClient({
       uri: "/solution/graphql",
@@ -96,39 +87,35 @@ export const Solutions: FC = () => {
           errorPolicy: "all",
         },
       },
-    })
+    });
   }
 
-  const challengeQueryResult = useQuery(
-    "getChallengeCreators",
-    async () => {
-      
-      if (jwtService.getToken() === null) {
-        return;
-      }
-      loadingService.loading = true;
+  const challengeQueryResult = useQuery("getChallengeCreators", async () => {
+    if (jwtService.getToken() === null) {
+      return;
+    }
+    loadingService.loading = true;
 
-      let result = await challengeClient.query({
-        query: gql`
-          query GetChallengeCreators {
-            challenge {
-              all {
-                id
-                createdBy
-              }
+    let result = await challengeClient.query({
+      query: gql`
+        query GetChallengeCreators {
+          challenge {
+            all {
+              id
+              createdBy
             }
           }
-        `,
-      });
-      loadingService.loading = false;
+        }
+      `,
+    });
+    loadingService.loading = false;
 
-      if (result.error || result.errors) {
-        return result;
-      } else {
-        return result.data.challenge.all;
-      }
+    if (result.error || result.errors) {
+      return result;
+    } else {
+      return result.data.challenge.all;
     }
-  )
+  });
 
   const { data, isError, isLoading, refetch } = useQuery(
     "getSolutions",
@@ -215,17 +202,18 @@ export const Solutions: FC = () => {
     );
   }
 
-  function isOwner(solution: {challengeId: Number}): boolean {
+  function isOwner(solution: { challengeId: Number }): boolean {
     let challenges = challengeQueryResult.data as Array<{
-      id: Number,
-      createdBy: String
+      id: Number;
+      createdBy: String;
     }>;
     console.log("challenges:", challenges);
 
     return challenges.some(
-      challenge => challenge.createdBy === jwtService.parseJwt()?.emailAddress && 
-          solution.challengeId === challenge.id
-    )
+      (challenge) =>
+        challenge.createdBy === jwtService.parseJwt()?.emailAddress &&
+        solution.challengeId === challenge.id
+    );
   }
 
   async function deleteSolution(id: String | Number) {
@@ -299,12 +287,14 @@ export const Solutions: FC = () => {
                         <Box width={"100%"} p={4}>
                           <HStack justifyContent={"space-between"}>
                             <Box fontSize={"1.5rem"} fontWeight="bold">
-                              {solution.createdBy} {
-                                solution.createdBy ===
-                                jwtService.parseJwt()?.emailAddress && (
-                                  solution.result ? <CheckIcon color={"green"}></CheckIcon> : <CloseIcon color={"red"}></CloseIcon>
-                                )
-                              }
+                              {solution.createdBy}{" "}
+                              {solution.createdBy ===
+                                jwtService.parseJwt()?.emailAddress &&
+                                (solution.result ? (
+                                  <CheckIcon color={"green"}></CheckIcon>
+                                ) : (
+                                  <CloseIcon color={"red"}></CloseIcon>
+                                ))}
                             </Box>
                             <Menu>
                               <MenuButton
@@ -345,21 +335,19 @@ export const Solutions: FC = () => {
                                       </MenuItem>
                                     </>
                                   )}
-                                  {
-                                    isOwner(solution) && (
-                                      <MenuItem
-                                        icon={<ViewIcon />}
-                                        onClick={(e) => {
-                                          navigate(
-                                            `/frontend/solution/review/${solution.id}`
-                                          );
-                                          e.stopPropagation();
-                                        }}
-                                      >
-                                        Review
-                                      </MenuItem>
-                                    )
-                                  }
+                                  {isOwner(solution) && (
+                                    <MenuItem
+                                      icon={<ViewIcon />}
+                                      onClick={(e) => {
+                                        navigate(
+                                          `/frontend/solution/review/${solution.id}`
+                                        );
+                                        e.stopPropagation();
+                                      }}
+                                    >
+                                      Review
+                                    </MenuItem>
+                                  )}
                                 </MenuGroup>
                                 <MenuGroup
                                   title="Comment"
@@ -383,9 +371,9 @@ export const Solutions: FC = () => {
                           </HStack>
                           <HStack>
                             <Box fontSize={"0.8rem"}>
-                              {
-                                typeof solution.points === "number" ? solution.points : "No results yet"
-                              }
+                              {typeof solution.points === "number"
+                                ? solution.points
+                                : "No results yet"}
                             </Box>
                           </HStack>
                           <HStack justifyContent={"end"}>

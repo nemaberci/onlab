@@ -8,7 +8,8 @@ import {
   FormControl,
   FormErrorMessage,
   FormLabel,
-  Input, Textarea
+  Input,
+  Textarea,
 } from "@chakra-ui/react";
 import { Field, Form, Formik } from "formik";
 import { FC } from "react";
@@ -42,40 +43,37 @@ export const Review: FC = () => {
     });
   }
 
-  const { data, isError, isLoading } = useQuery(
-    "getSolution",
-    async () => {
-      if (jwtService.getToken() === null || !params || !params.id) {
-        return;
-      }
+  const { data, isError, isLoading } = useQuery("getSolution", async () => {
+    if (jwtService.getToken() === null || !params || !params.id) {
+      return;
+    }
 
-      loadingService.loading = true;
-      let result = await client.query({
-        query: gql`
-          query GetSolution($id: ID!) {
-            solution {
-              byId(id: $id) {
-                id
-                content
-                language
-              }
+    loadingService.loading = true;
+    let result = await client.query({
+      query: gql`
+        query GetSolution($id: ID!) {
+          solution {
+            byId(id: $id) {
+              id
+              content
+              language
             }
           }
-        `,
-        variables: {
-          id: params.id,
-        },
-      });
-      loadingService.loading = false;
+        }
+      `,
+      variables: {
+        id: params.id,
+      },
+    });
+    loadingService.loading = false;
 
-      if (result.error || result.errors) {
-        console.log("Error: ", result.error, result.errors);
-      } else {
-        console.log("Returning: ", result.data.solution.byId);
-        return result.data.solution.byId;
-      }
+    if (result.error || result.errors) {
+      console.log("Error: ", result.error, result.errors);
+    } else {
+      console.log("Returning: ", result.data.solution.byId);
+      return result.data.solution.byId;
     }
-  );
+  });
 
   async function onSend(formData: any) {
     console.log(formData);
@@ -87,27 +85,21 @@ export const Review: FC = () => {
     loadingService.loading = true;
     let result = await client.mutate({
       mutation: gql`
-        mutation ReviewSolution(
-          $solutionId: ID!,
-          $review: ReviewInput!
-        ) {
+        mutation ReviewSolution($solutionId: ID!, $review: ReviewInput!) {
           solution {
-            review(
-                id: $solutionId,
-                review: $review
-            ) {
-                id
+            review(id: $solutionId, review: $review) {
+              id
             }
           }
         }
       `,
       variables: {
-          solutionId: params.id,
-          review: {
-              points: formData.points,
-              result: formData.accepted,
-              comment: formData.comment
-          }
+        solutionId: params.id,
+        review: {
+          points: formData.points,
+          result: formData.accepted,
+          comment: formData.comment,
+        },
       },
     });
     loadingService.loading = false;
@@ -141,26 +133,32 @@ export const Review: FC = () => {
 
   return (
     <Layout>
-      <Flex direction={{base: "column", sm: "row"}}>
+      <Flex direction={{ base: "column", sm: "row" }}>
         <Box p={8} flex="1">
-            <Flex justifyContent={"center"}>
-                <Badge colorScheme={"blue"} fontSize={"2xl"}>Solution</Badge>
-            </Flex>
-            <FormLabel htmlFor="language">Language</FormLabel>
-            <Input id="language" isReadOnly value={data.language}/>
-            <FormLabel htmlFor="solution" pt={2}>Solution</FormLabel>
-            <Textarea
-                id="solution"
-                placeholder="Solution"
-                height="20rem"
-                isReadOnly
-                value={data.content}
-            />
+          <Flex justifyContent={"center"}>
+            <Badge colorScheme={"blue"} fontSize={"2xl"}>
+              Solution
+            </Badge>
+          </Flex>
+          <FormLabel htmlFor="language">Language</FormLabel>
+          <Input id="language" isReadOnly value={data.language} />
+          <FormLabel htmlFor="solution" pt={2}>
+            Solution
+          </FormLabel>
+          <Textarea
+            id="solution"
+            placeholder="Solution"
+            height="20rem"
+            isReadOnly
+            value={data.content}
+          />
         </Box>
         <Box p={8} flex="1">
-            <Flex justifyContent={"center"}>
-                <Badge colorScheme={"green"} fontSize={"2xl"}>Review</Badge>
-            </Flex>
+          <Flex justifyContent={"center"}>
+            <Badge colorScheme={"green"} fontSize={"2xl"}>
+              Review
+            </Badge>
+          </Flex>
           <Formik
             onSubmit={onSend}
             initialValues={{ accepted: false, points: 0, comment: "" }}
@@ -172,7 +170,9 @@ export const Review: FC = () => {
                   <FormControl
                     isInvalid={form.errors.accepted && form.touched.accepted}
                   >
-                    <Checkbox {...field} id="accepted" size={"lg"}>Accept</Checkbox>
+                    <Checkbox {...field} id="accepted" size={"lg"}>
+                      Accept
+                    </Checkbox>
                     <FormErrorMessage>{form.errors.accepted}</FormErrorMessage>
                   </FormControl>
                 )}
@@ -201,7 +201,9 @@ export const Review: FC = () => {
                   </FormControl>
                 )}
               </Field>
-              <Button type={"submit"} mt={"4"} colorScheme={"teal"}>Save!</Button>
+              <Button type={"submit"} mt={"4"} colorScheme={"teal"}>
+                Save!
+              </Button>
             </Form>
           </Formik>
         </Box>

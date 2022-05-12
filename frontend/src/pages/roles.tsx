@@ -5,9 +5,11 @@ import {
   Grid,
   Table,
   Tbody,
-  Td, Text, Th,
+  Td,
+  Text,
+  Th,
   Thead,
-  Tr
+  Tr,
 } from "@chakra-ui/react";
 import { FC } from "react";
 import { useQuery } from "react-query";
@@ -66,35 +68,32 @@ export const Roles: FC = () => {
     }
   );
 
-  const rolesQuery = useQuery(
-    "getRoles",
-    async () => {
-      if (jwtService.getToken() === null) {
-        return;
-      }
+  const rolesQuery = useQuery("getRoles", async () => {
+    if (jwtService.getToken() === null) {
+      return;
+    }
 
-      let result = await client.query({
-        query: gql`
-          query GetRoles {
-            role {
-              all {
-                id
-                name
-              }
+    let result = await client.query({
+      query: gql`
+        query GetRoles {
+          role {
+            all {
+              id
+              name
             }
           }
-        `,
-      });
+        }
+      `,
+    });
 
-      if (result.error || result.errors) {
-        console.log("Error: ", result.error, result.errors);
-      } else {
-        return result.data.role.all;
-      }
+    if (result.error || result.errors) {
+      console.log("Error: ", result.error, result.errors);
+    } else {
+      return result.data.role.all;
     }
-  );
+  });
 
-  const roles = rolesQuery.data
+  const roles = rolesQuery.data;
 
   if (isLoading) {
     return (
@@ -148,10 +147,11 @@ export const Roles: FC = () => {
             addRole(emailAddress: null, id: $id, role: $role)
           }
         }
-      `, variables: {
+      `,
+      variables: {
         id: id,
-        role: role
-      }
+        role: role,
+      },
     });
 
     if (result.errors) {
@@ -175,10 +175,11 @@ export const Roles: FC = () => {
             deleteRole(emailAddress: null, id: $id, role: $role)
           }
         }
-      `, variables: {
+      `,
+      variables: {
         id: id,
-        role: role
-      }
+        role: role,
+      },
     });
 
     if (result.errors) {
@@ -220,28 +221,29 @@ export const Roles: FC = () => {
                         {user.admin && "Admin"}
                       </Td>
                       <Td>
-                        {
-                          roles.map(
-                            (role: { id: Number, name: String }) => 
-                              user.roles.find(userRole => userRole.name === role.name) ? (
-                                <Button
-                                  variant={"ghost"}
-                                  colorScheme="red"
-                                  onClick={() => delete_role(user.id, role.name)}
-                                >
-                                  <Text display="block">Delete {role.name} right</Text>
-                                </Button>
-                              ) : (
-                                <Button
-                                  variant={"ghost"}
-                                  colorScheme="green"
-                                  onClick={() => add_role(user.id, role.name)}
-                                >
-                                  <Text display="block">Add {role.name} right</Text>
-                                </Button>
-                              )
+                        {roles.map((role: { id: Number; name: String }) =>
+                          user.roles.find(
+                            (userRole) => userRole.name === role.name
+                          ) ? (
+                            <Button
+                              variant={"ghost"}
+                              colorScheme="red"
+                              onClick={() => delete_role(user.id, role.name)}
+                            >
+                              <Text display="block">
+                                Delete {role.name} right
+                              </Text>
+                            </Button>
+                          ) : (
+                            <Button
+                              variant={"ghost"}
+                              colorScheme="green"
+                              onClick={() => add_role(user.id, role.name)}
+                            >
+                              <Text display="block">Add {role.name} right</Text>
+                            </Button>
                           )
-                        }
+                        )}
                       </Td>
                     </Tr>
                   );

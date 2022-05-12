@@ -1,16 +1,16 @@
-import { createContext, FC, useState } from "react";
+import { ApolloClient, gql, InMemoryCache } from "@apollo/client";
 import { Box, Button, Flex, Stack, Text } from "@chakra-ui/react";
-import { MenuItem, MenuToggle, Navbar } from "./navbar";
+import { FC, useState } from "react";
 import GoogleLogin, {
   GoogleLoginResponse,
   GoogleLoginResponseOffline,
 } from "react-google-login";
-import { ColorModeSwitcher } from "../../ColorModeSwitcher";
-import { ApolloClient, gql, InMemoryCache } from "@apollo/client";
-import { jwtService } from "../../service/login";
-import { useNavigate } from "react-router-dom";
 import LoadingOverlay from "react-loading-overlay";
+import { useNavigate } from "react-router-dom";
+import { ColorModeSwitcher } from "../../ColorModeSwitcher";
 import { loadingService } from "../../service/loading";
+import { jwtService } from "../../service/login";
+import { MenuItem, MenuToggle, Navbar } from "./navbar";
 
 function onLoginFail(resp: any): void {
   console.log("Login fail: ", resp);
@@ -24,7 +24,7 @@ export const Layout: FC = ({ children }) => {
   let [loadingCopy, setLoadingCopy] = useState(false);
 
   function changeLoadingCopy(value: boolean) {
-    setLoadingCopy(value)
+    setLoadingCopy(value);
   }
 
   loadingService.changedCallback = changeLoadingCopy;
@@ -112,21 +112,27 @@ export const Layout: FC = ({ children }) => {
               pt={[4, 4, 0, 0]}
             >
               <MenuItem to="/frontend">Home</MenuItem>
-              {
-                typeof jwtService.getToken() === "string" && (
-                  <MenuItem to="/frontend/challenges">Challenges</MenuItem>
-                )
-              }
-              {
-                typeof jwtService.getToken() === "string" && (
-                  <MenuItem to={`/frontend/challenges/user/${jwtService.parseJwt()?.emailAddress}`}>My Challenges</MenuItem>
-                )
-              }
-              {
-                typeof jwtService.getToken() === "string" && (
-                  <MenuItem to={`/frontend/solutions/user/${jwtService.parseJwt()?.emailAddress}`}>My Solutions</MenuItem>
-                )
-              }
+              {typeof jwtService.getToken() === "string" && (
+                <MenuItem to="/frontend/challenges">Challenges</MenuItem>
+              )}
+              {typeof jwtService.getToken() === "string" && (
+                <MenuItem
+                  to={`/frontend/challenges/user/${
+                    jwtService.parseJwt()?.emailAddress
+                  }`}
+                >
+                  My Challenges
+                </MenuItem>
+              )}
+              {typeof jwtService.getToken() === "string" && (
+                <MenuItem
+                  to={`/frontend/solutions/user/${
+                    jwtService.parseJwt()?.emailAddress
+                  }`}
+                >
+                  My Solutions
+                </MenuItem>
+              )}
             </Stack>
             <Stack
               spacing={4}

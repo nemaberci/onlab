@@ -3,11 +3,9 @@ import { FC } from "react";
 import { Layout } from "../component/layout/layout";
 
 export const Index: FC = () => {
-    return (
-        <Layout>
-            <Grid >
-
-            </Grid>
-        </Layout>
-    )
-}
+  return (
+    <Layout>
+      <Grid></Grid>
+    </Layout>
+  );
+};

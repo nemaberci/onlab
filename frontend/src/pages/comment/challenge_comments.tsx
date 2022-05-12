@@ -144,10 +144,10 @@ export const ChallengeComments: FC<{
 
     return (
       <>
-        {(!data.length || (data.length && data.length < 1)) && (
-          <HStack justifyContent={"center"}>
+        {data.length === 0 && (
+          <Flex justifyContent={"center"}>
             Looks like there are no comments here yet.
-          </HStack>
+          </Flex>
         )}
         {data.map &&
           data.map(

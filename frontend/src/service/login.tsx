@@ -16,7 +16,7 @@ class JwtService {
   }
 
   // from: https://stackoverflow.com/questions/38552003/how-to-decode-jwt-token-in-javascript-without-using-a-library
-  public parseJwt(): {emailAddress: String, roles: Array<String>} | null {
+  public parseJwt(): { emailAddress: String; roles: Array<String> } | null {
     if (typeof Cookies.get("token") !== "string") {
       console.log("Parsed null");
       return null;
