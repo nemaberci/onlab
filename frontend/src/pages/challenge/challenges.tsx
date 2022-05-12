@@ -75,39 +75,44 @@ export const Challenges: FC = () => {
 
       let result;
 
-      if (params.email) {
-        result = await client.query({
-          query: gql`
-            query GetChallengesByEmail($email: String!) {
-              challenge {
-                byEmail(email: $email) {
-                  description
-                  id
-                  name
-                  createdBy
+      try {
+        if (params.email) {
+          result = await client.query({
+            query: gql`
+              query GetChallengesByEmail($email: String!) {
+                challenge {
+                  byEmail(email: $email) {
+                    description
+                    id
+                    name
+                    createdBy
+                  }
                 }
               }
-            }
-          `,
-          variables: {
-            email: params.email,
-          },
-        });
-      } else {
-        result = await client.query({
-          query: gql`
-            query GetChallenges {
-              challenge {
-                all {
-                  description
-                  id
-                  name
-                  createdBy
+            `,
+            variables: {
+              email: params.email,
+            },
+          });
+        } else {
+          result = await client.query({
+            query: gql`
+              query GetChallenges {
+                challenge {
+                  all {
+                    description
+                    id
+                    name
+                    createdBy
+                  }
                 }
               }
-            }
-          `,
-        });
+            `,
+          });
+        }
+      } catch (e) {
+        loadingService.loading = false;
+        throw e;
       }
 
       loadingService.loading = false;

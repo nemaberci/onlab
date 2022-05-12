@@ -32,6 +32,11 @@ export const Review: FC = () => {
       headers: {
         Authorization: `Token ${jwtService.getToken()}`,
       },
+      defaultOptions: {
+        query: {
+          errorPolicy: "all",
+        },
+      },
     });
   } else {
     client = new ApolloClient({
@@ -39,6 +44,11 @@ export const Review: FC = () => {
       cache: new InMemoryCache(),
       headers: {
         Authorization: `Token ${jwtService.getToken()}`,
+      },
+      defaultOptions: {
+        query: {
+          errorPolicy: "all",
+        },
       },
     });
   }
@@ -49,22 +59,28 @@ export const Review: FC = () => {
     }
 
     loadingService.loading = true;
-    let result = await client.query({
-      query: gql`
-        query GetSolution($id: ID!) {
-          solution {
-            byId(id: $id) {
-              id
-              content
-              language
+    let result;
+    try {
+      result = await client.query({
+        query: gql`
+          query GetSolution($id: ID!) {
+            solution {
+              byId(id: $id) {
+                id
+                content
+                language
+              }
             }
           }
-        }
-      `,
-      variables: {
-        id: params.id,
-      },
-    });
+        `,
+        variables: {
+          id: params.id,
+        },
+      });
+    } catch (e) {
+      loadingService.loading = false;
+      throw e;
+    }
     loadingService.loading = false;
 
     if (result.error || result.errors) {

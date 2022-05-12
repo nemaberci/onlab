@@ -29,6 +29,11 @@ export const SolutionComments: FC<{
       headers: {
         Authorization: `Token ${jwtService.getToken()}`,
       },
+      defaultOptions: {
+        query: {
+          errorPolicy: "all",
+        },
+      },
     });
   } else {
     client = new ApolloClient({
@@ -36,6 +41,11 @@ export const SolutionComments: FC<{
       cache: new InMemoryCache(),
       headers: {
         Authorization: `Token ${jwtService.getToken()}`,
+      },
+      defaultOptions: {
+        query: {
+          errorPolicy: "all",
+        },
       },
     });
   }
@@ -48,22 +58,28 @@ export const SolutionComments: FC<{
       }
       loadingService.loading = true;
 
-      let result = await client.query({
-        query: gql`
-          query GetSolutionComments($id: ID!) {
-            comment {
-              byOwner(owner: { type: SOLUTION, id: $id }) {
-                id
-                text
-                createdBy
+      let result;
+      try {
+        result = await client.query({
+          query: gql`
+            query GetSolutionComments($id: ID!) {
+              comment {
+                byOwner(owner: { type: SOLUTION, id: $id }) {
+                  id
+                  text
+                  createdBy
+                }
               }
             }
-          }
-        `,
-        variables: {
-          id: solutionId,
-        },
-      });
+          `,
+          variables: {
+            id: solutionId,
+          },
+        });
+      } catch (e) {
+        loadingService.loading = false;
+        throw e;
+      }
       loadingService.loading = false;
 
       if (result.error || result.errors) {

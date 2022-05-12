@@ -1,11 +1,12 @@
 import { ApolloClient, gql, InMemoryCache } from "@apollo/client";
 import { Box, Button, Flex, Stack, Text } from "@chakra-ui/react";
 import { FC, useState } from "react";
-import GoogleLogin, {
+import {
+  GoogleLogin,
   GoogleLoginResponse,
   GoogleLoginResponseOffline,
 } from "react-google-login";
-import LoadingOverlay from "react-loading-overlay";
+import LoadingOverlay from "react-loading-overlay-ts";
 import { useNavigate } from "react-router-dom";
 import { ColorModeSwitcher } from "../../ColorModeSwitcher";
 import { loadingService } from "../../service/loading";
@@ -50,11 +51,21 @@ export const Layout: FC = ({ children }) => {
       client = new ApolloClient({
         uri: "http://localhost:8082/graphql",
         cache: new InMemoryCache(),
+        defaultOptions: {
+          query: {
+            errorPolicy: "all",
+          },
+        },
       });
     } else {
       client = new ApolloClient({
         uri: "/user/graphql",
         cache: new InMemoryCache(),
+        defaultOptions: {
+          query: {
+            errorPolicy: "all",
+          },
+        },
       });
     }
 

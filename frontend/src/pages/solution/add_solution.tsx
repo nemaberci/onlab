@@ -31,6 +31,11 @@ export const AddSolution: FC = () => {
         headers: {
           Authorization: `Token ${jwtService.getToken()}`,
         },
+        defaultOptions: {
+          query: {
+            errorPolicy: "all",
+          },
+        },
       });
     } else {
       client = new ApolloClient({
@@ -38,6 +43,11 @@ export const AddSolution: FC = () => {
         cache: new InMemoryCache(),
         headers: {
           Authorization: `Token ${jwtService.getToken()}`,
+        },
+        defaultOptions: {
+          query: {
+            errorPolicy: "all",
+          },
         },
       });
     }

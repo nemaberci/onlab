@@ -3,13 +3,11 @@ import { DeleteIcon, EditIcon, SettingsIcon } from "@chakra-ui/icons";
 import {
   Alert,
   Box,
-  Flex,
-  HStack,
-  IconButton,
+  Flex, IconButton,
   Menu,
   MenuButton,
   MenuItem,
-  MenuList,
+  MenuList
 } from "@chakra-ui/react";
 import { FC } from "react";
 import { useQuery } from "react-query";
@@ -58,22 +56,30 @@ export const ChallengeComments: FC<{
         return;
       }
 
-      let result = await client.query({
-        query: gql`
-          query GetChallengeComments($id: ID!) {
-            comment {
-              byOwner(owner: { type: CHALLENGE, id: $id }) {
-                id
-                text
-                createdBy
+      loadingService.loading = true;
+      let result;
+      try {
+        result = await client.query({
+          query: gql`
+            query GetChallengeComments($id: ID!) {
+              comment {
+                byOwner(owner: { type: CHALLENGE, id: $id }) {
+                  id
+                  text
+                  createdBy
+                }
               }
             }
-          }
-        `,
-        variables: {
-          id: challengeId,
-        },
-      });
+          `,
+          variables: {
+            id: challengeId,
+          },
+        });
+      } catch (e) {
+        loadingService.loading = false;
+        throw e;
+      }
+      loadingService.loading = false;
 
       if (result.error || result.errors) {
         console.log("Error: ", result.error, result.errors);

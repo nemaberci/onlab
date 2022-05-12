@@ -7,6 +7,7 @@ import hu.nemaberci.comment.input.CommentOwnerInput
 import hu.nemaberci.comment.proto.CommentOuterClass
 import hu.nemaberci.comment.proto.CommentServiceGrpc
 import hu.nemaberci.comment.service.CommentService
+import hu.nemaberci.solution.util.TryAgainUtil
 import net.devh.boot.grpc.client.inject.GrpcClient
 import net.devh.boot.grpc.server.service.GrpcService
 import hu.nemaberci.user.proto.User
@@ -35,25 +36,14 @@ class CommentGrpcService : CommentServiceGrpc.CommentServiceImplBase() {
         taskExecutor.execute {
 
             val logger = LoggerFactory.getLogger(CommentGrpcService::class.java)
-
-            while (true) {
-
-                try {
-
-                    userServiceBlockingStub.registedRole(
-                            User.RegisterRole.newBuilder()
-                                    .setRole(CommentService.ROLE_COMMENT)
-                                    .build()
-                    )
-                    logger.info("Registered role ROLE_COMMENT")
-                    break;
-                } catch (e: Exception) {
-                    logger.error("Could not register role, trying again in 10 seconds.")
-                    Thread.sleep(10000L)
-                }
-
+            TryAgainUtil.tryInfinitely {
+                userServiceBlockingStub.registedRole(
+                        User.RegisterRole.newBuilder()
+                                .setRole(CommentService.ROLE_COMMENT)
+                                .build()
+                )
             }
-
+            logger.info("Registered role ROLE_COMMENT")
 
         }
 

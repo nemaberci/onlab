@@ -29,6 +29,11 @@ export const EditComment: FC = () => {
       headers: {
         Authorization: `Token ${jwtService.getToken()}`,
       },
+      defaultOptions: {
+        query: {
+          errorPolicy: "all",
+        },
+      },
     });
   } else {
     commentClient = new ApolloClient({
@@ -36,6 +41,11 @@ export const EditComment: FC = () => {
       cache: new InMemoryCache(),
       headers: {
         Authorization: `Token ${jwtService.getToken()}`,
+      },
+      defaultOptions: {
+        query: {
+          errorPolicy: "all",
+        },
       },
     });
   }
@@ -50,20 +60,26 @@ export const EditComment: FC = () => {
 
       // update mode
 
-      let result = await commentClient.query({
-        query: gql`
-          query GetCommentData($id: ID!) {
-            comment {
-              byId(id: $id) {
-                text
+      let result;
+      try {
+        result = await commentClient.query({
+          query: gql`
+            query GetCommentData($id: ID!) {
+              comment {
+                byId(id: $id) {
+                  text
+                }
               }
             }
-          }
-        `,
-        variables: {
-          id: params.commentid,
-        },
-      });
+          `,
+          variables: {
+            id: params.commentid,
+          },
+        });
+      } catch (e) {
+        loadingService.loading = false;
+        throw e;
+      }
 
       loadingService.loading = false;
 

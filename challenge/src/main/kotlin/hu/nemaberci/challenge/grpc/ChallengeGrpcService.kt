@@ -3,6 +3,7 @@ package hu.nemaberci.challenge.grpc
 import hu.nemaberci.challenge.proto.ChallengeOuterClass
 import hu.nemaberci.challenge.proto.ChallengeServiceGrpc
 import hu.nemaberci.challenge.service.ChallengeService
+import hu.nemaberci.solution.util.TryAgainUtil
 import hu.nemaberci.user.proto.User
 import hu.nemaberci.user.proto.UserServiceGrpc
 import io.grpc.stub.StreamObserver
@@ -68,24 +69,14 @@ class ChallengeGrpcService: ChallengeServiceGrpc.ChallengeServiceImplBase() {
         taskExecutor.execute {
 
             val logger = LoggerFactory.getLogger(ChallengeGrpcService::class.java)
-
-            while (true) {
-
-                try {
-                    userServiceBlockingStub.registedRole(
-                            User.RegisterRole.newBuilder()
-                                    .setRole(ChallengeService.CHALLENGE_ROLE)
-                                    .build()
-                    )
-                    logger.info("Registered role ROLE_CHALLENGE")
-                    break;
-                } catch (e: Exception) {
-                    logger.error("Could not register role, trying again in 10 seconds.")
-                    Thread.sleep(10000L)
-                }
-
+            TryAgainUtil.tryInfinitely {
+                userServiceBlockingStub.registedRole(
+                        User.RegisterRole.newBuilder()
+                                .setRole(ChallengeService.CHALLENGE_ROLE)
+                                .build()
+                )
             }
-
+            logger.info("Registered role ROLE_CHALLENGE")
 
         }
 

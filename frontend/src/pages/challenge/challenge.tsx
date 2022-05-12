@@ -30,6 +30,11 @@ export const Challenge: FC = () => {
       headers: {
         Authorization: `Token ${jwtService.getToken()}`,
       },
+      defaultOptions: {
+        query: {
+          errorPolicy: "all",
+        },
+      },
     });
   } else {
     client = new ApolloClient({
@@ -37,6 +42,11 @@ export const Challenge: FC = () => {
       cache: new InMemoryCache(),
       headers: {
         Authorization: `Token ${jwtService.getToken()}`,
+      },
+      defaultOptions: {
+        query: {
+          errorPolicy: "all",
+        },
       },
     });
   }
@@ -47,22 +57,27 @@ export const Challenge: FC = () => {
     }
 
     loadingService.loading = true;
-
-    let result = await client.query({
-      query: gql`
-        query GetChallenge($id: ID!) {
-          challenge {
-            byId(id: $id) {
-              description
-              name
+    let result;
+    try {
+      result = await client.query({
+        query: gql`
+          query GetChallenge($id: ID!) {
+            challenge {
+              byId(id: $id) {
+                description
+                name
+              }
             }
           }
-        }
-      `,
-      variables: {
-        id: params.id,
-      },
-    });
+        `,
+        variables: {
+          id: params.id,
+        },
+      });
+    } catch (e) {
+      loadingService.loading = false;
+      throw e;
+    }
 
     loadingService.loading = false;
 
@@ -84,6 +99,11 @@ export const Challenge: FC = () => {
         headers: {
           Authorization: `Token ${jwtService.getToken()}`,
         },
+        defaultOptions: {
+          query: {
+            errorPolicy: "all",
+          },
+        },
       });
     } else {
       client = new ApolloClient({
@@ -91,6 +111,11 @@ export const Challenge: FC = () => {
         cache: new InMemoryCache(),
         headers: {
           Authorization: `Token ${jwtService.getToken()}`,
+        },
+        defaultOptions: {
+          query: {
+            errorPolicy: "all",
+          },
         },
       });
     }
@@ -134,6 +159,11 @@ export const Challenge: FC = () => {
         headers: {
           Authorization: `Token ${jwtService.getToken()}`,
         },
+        defaultOptions: {
+          query: {
+            errorPolicy: "all",
+          },
+        },
       });
     } else {
       client = new ApolloClient({
@@ -141,6 +171,11 @@ export const Challenge: FC = () => {
         cache: new InMemoryCache(),
         headers: {
           Authorization: `Token ${jwtService.getToken()}`,
+        },
+        defaultOptions: {
+          query: {
+            errorPolicy: "all",
+          },
         },
       });
     }

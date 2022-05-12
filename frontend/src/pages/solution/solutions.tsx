@@ -96,18 +96,24 @@ export const Solutions: FC = () => {
     }
     loadingService.loading = true;
 
-    let result = await challengeClient.query({
-      query: gql`
-        query GetChallengeCreators {
-          challenge {
-            all {
-              id
-              createdBy
+    let result;
+    try {
+      result = await challengeClient.query({
+        query: gql`
+          query GetChallengeCreators {
+            challenge {
+              all {
+                id
+                createdBy
+              }
             }
           }
-        }
-      `,
-    });
+        `,
+      });
+    } catch (e) {
+      loadingService.loading = false;
+      throw e;
+    }
     loadingService.loading = false;
 
     if (result.error || result.errors) {
@@ -127,45 +133,50 @@ export const Solutions: FC = () => {
 
       let result;
 
-      if (params.email) {
-        result = await client.query({
-          query: gql`
-            query GetChallengesByEmail($email: String!) {
-              solution {
-                byEmail(email: $email) {
-                  id
-                  language
-                  createdBy
-                  points
-                  result
-                  challengeId
+      try {
+        if (params.email) {
+          result = await client.query({
+            query: gql`
+              query GetChallengesByEmail($email: String!) {
+                solution {
+                  byEmail(email: $email) {
+                    id
+                    language
+                    createdBy
+                    points
+                    result
+                    challengeId
+                  }
                 }
               }
-            }
-          `,
-          variables: {
-            email: params.email,
-          },
-        });
-      } else {
-        result = await client.query({
-          query: gql`
-            query GetSolutions($id: ID!) {
-              solution {
-                byChallenge(id: $id) {
-                  id
-                  language
-                  createdBy
-                  points
-                  challengeId
+            `,
+            variables: {
+              email: params.email,
+            },
+          });
+        } else {
+          result = await client.query({
+            query: gql`
+              query GetSolutions($id: ID!) {
+                solution {
+                  byChallenge(id: $id) {
+                    id
+                    language
+                    createdBy
+                    points
+                    challengeId
+                  }
                 }
               }
-            }
-          `,
-          variables: {
-            id: params.id,
-          },
-        });
+            `,
+            variables: {
+              id: params.id,
+            },
+          });
+        }
+      } catch (e) {
+        loadingService.loading = false;
+        throw e;
       }
 
       loadingService.loading = false;
@@ -182,21 +193,21 @@ export const Solutions: FC = () => {
     }
   );
 
-  if (isLoading || challengeQueryResult.isLoading) {
-    return (
-      <Layout>
-        <Flex justifyContent={"center"}>
-          <h2>Loading...</h2>
-        </Flex>
-      </Layout>
-    );
-  }
-
   if (isError || challengeQueryResult.isError) {
     return (
       <Layout>
         <Flex justifyContent={"center"}>
           <h2>Error fetching data. Please reload the page.</h2>
+        </Flex>
+      </Layout>
+    );
+  }
+
+  if (isLoading || challengeQueryResult.isLoading) {
+    return (
+      <Layout>
+        <Flex justifyContent={"center"}>
+          <h2>Loading...</h2>
         </Flex>
       </Layout>
     );
