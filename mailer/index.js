@@ -40,6 +40,17 @@ async function connect() {
       console.log("Connected!");
       connected = true;
 
+      conn.on("close", () => {
+        connected = false;
+        return setTimeout(connect, 1000)
+      });
+
+      conn.on("error", (err) => {
+        connected = false;
+        console.log(err);
+        return setTimeout(connect, 1000);
+      });
+
       conn.createChannel((err1, channel) => {
         if (err1) {
           throw err1;
@@ -77,6 +88,8 @@ async function connect() {
             comment: content,
           });
         });
+
+        // todo: reconnect
       });
     });
   }
